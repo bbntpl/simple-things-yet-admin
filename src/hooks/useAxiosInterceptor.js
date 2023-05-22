@@ -21,10 +21,14 @@ function useAxiosInterceptor() {
 			return response;
 		}, function (error) {
 			const errorMessage = error?.response?.data?.message || error.message;
+			const areFormErrorsExists = !!error?.response?.data?.errors;
+			const isSingleErrorExists = !!error?.response?.data?.error;
 			if (isTokenExpiredError(error)) {
 				// automatically logout when the token expires
 				logoutWhenTokenExpires();
 				throw new Error('Token expired');
+			} else if (areFormErrorsExists || isSingleErrorExists) {
+				return error.response;
 			} else {
 				throw new Error(errorMessage);
 			}

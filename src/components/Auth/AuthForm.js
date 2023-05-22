@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 
-import { loginUser, registerUser } from '../../services/user';
-import AuthErrors from './AuthErrors';
+import { loginUser, registerUser } from '../../services/userAPI';
 import { loginAuthor, selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice';
 import LS from '../../utils/localStorage';
 import openNotification from '../../lib/openNotification';
+import FormErrors from '../FormErrors';
 
 function AuthForm({ authFormType }) {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
@@ -102,7 +102,11 @@ function AuthForm({ authFormType }) {
 				<Navigate to='/dashboard' replace={true} />
 			)
 		}
-		<h1>{authFormType === 'register' ? 'Author Registration' : 'Login as author'}</h1>
+		<h1>{
+			authFormType === 'register'
+				? 'Author Registration'
+				: 'Login as author'}
+		</h1>
 		<form onSubmit={submitAuthorForm}>
 			{
 				authFormType === 'register' &&
@@ -119,7 +123,7 @@ function AuthForm({ authFormType }) {
 				<label htmlFor='password'>Password: </label>
 				<input type='password' value={password} onChange={e => setPassword(e.target.value)} />
 			</div>
-			{errorMessages.length !== 0 && <AuthErrors errorMessages={errorMessages} />}
+			{errorMessages.length !== 0 && <FormErrors errorMessages={errorMessages} />}
 			<div>
 				<input type='submit' value={authFormType === 'register' ? 'Register' : 'Login'} />
 				{authFormType === 'register' && <button onClick={resetFields}>Clear</button>}

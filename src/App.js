@@ -1,6 +1,5 @@
 import './App.css';
 import { Provider } from 'react-redux';
-import store from './redux/store';
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -9,7 +8,7 @@ import {
 
 import LoginPage from './views/auth/LoginPage';
 import RegisterPage from './views/auth/RegisterPage';
-import CreateCategoryPage from './views/CreateCategoryPage';
+import CreateCategoryPage from './views/categories/CreateCategoryPage';
 import ProfilePage from './views/ProfilePage';
 import CreateBlogPage from './views/blogs/CreateBlogPage';
 import BlogsPage from './views/blogs/BlogsPage';
@@ -20,8 +19,10 @@ import ViewerPage from './views/viewers/ViewerPage';
 import CommentsPage from './views/comments/CommentsPage';
 import CommentPage from './views/comments/CommentPage';
 import Dashboard from './views/Dashboard';
-
 import AuthGateway from './lib/AuthGateway';
+
+import store from './redux/store';
+import NotFoundPage from './views/NotFoundPage';
 
 function App() {
 	return (
@@ -101,6 +102,7 @@ function App() {
 							</AuthGateway>
 						} >
 						</Route>
+						<Route path='*' element={<NotFoundPage />} />
 					</Routes>
 				</div>
 			</Router>

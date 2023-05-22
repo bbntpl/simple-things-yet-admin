@@ -8,7 +8,7 @@ const loggedAuthorSlice = createSlice({
 	name: 'loggedAuthor',
 	initialState,
 	reducers: {
-		logoutAuthor(state) {
+		logoutAuthor() {
 			LS.removeItem('loggedAuthor');
 			return null;
 		},
@@ -19,6 +19,7 @@ const loggedAuthorSlice = createSlice({
 });
 
 export const selectLoggedAuthor = (state) => state.loggedAuthor;
+export const selectToken = (state) => state.loggedAuthor.token;
 export const {
 	logoutAuthor,
 	loginAuthor

@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import useAutomaticLogoutOnTokenExpiry from '../hooks/useAxiosInterceptor';
+import NavHeader from '../components/NavHeader';
 
 function AuthGateway({ children }) {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
@@ -11,7 +12,12 @@ function AuthGateway({ children }) {
 		return <Navigate to='/login' replace={true} />;
 	}
 
-	return children;
+	return (
+		<>
+			<NavHeader />
+			{children}
+		</>
+	);
 }
 
 export default AuthGateway;

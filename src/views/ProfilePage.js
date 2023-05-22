@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { getUserAccount, updateAuthor } from '../services/user';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import ReactQuill from 'react-quill';
+import { getUserAccount, updateAuthor } from '../services/userAPI';
 import { useSelector } from 'react-redux';
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import openNotification from '../lib/openNotification';
-import NavigationBar from '../components/NavigationBar';
+import 'react-quill/dist/quill.snow.css';
 
 function AuthorComments({ commentsArray }) {
 	return <ul>
@@ -52,13 +52,18 @@ function ProfilePage() {
 				})
 			});
 	}
+	const handleQuillChange = (content) => {
+		setAuthor(author => ({
+			...author,
+			bio: content
+		}))
+	}
 
 	if (author === null) {
 		return;
 	}
 
 	return <div>
-		<NavigationBar />
 		<div>
 			<form onSubmit={handleAuthorUpdate}>
 				<div>
@@ -66,12 +71,16 @@ function ProfilePage() {
 					<input value={author.name} name='name' onChange={handleChange} />
 				</div>
 				<div>
-					<label htmlFor='bio'>Bio: </label>
-					<textarea name='bio' value={author.bio} onChange={handleChange}></textarea>
-				</div>
-				<div>
 					<label htmlFor='email'>Email: </label>
 					<input value={author.email} name='email' onChange={handleChange} />
+				</div>
+				<div>
+					<label htmlFor='bio'>Bio: </label>
+					<ReactQuill
+						theme='snow'
+						value={author.bio}
+						onChange={handleQuillChange}
+					/>
 				</div>
 				<input type='submit' value='Update' />
 			</form>
