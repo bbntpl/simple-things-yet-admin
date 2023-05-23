@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
-import { Layout, Form, Input, Button, Typography, Alert, Space } from 'antd';
+import { Layout, Form, Input, Button, Typography, Space } from 'antd';
 
 import { loginUser, registerUser } from '../../services/userAPI';
 import { loginAuthor, selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice';
@@ -157,16 +157,7 @@ function AuthForm({ authFormType }) {
 				>
 					<Input.Password value={password} onChange={e => setPassword(e.target.value)} />
 				</Form.Item>
-
-				{errorMessages.length !== 0 &&
-					<Space>
-						<Alert
-							message={<FormErrors errorMessages={errorMessages} />}
-							type='error'
-						/>
-					</Space>
-				}
-
+				<FormErrors errorMessages={errorMessages} />
 				<Form.Item style={{ margin: '1rem' }}>
 					<Space size='middle'>
 						<Button type='primary' htmlType='submit'>

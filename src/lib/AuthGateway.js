@@ -12,7 +12,7 @@ const contentStyle = {
 	textAlign: 'center',
 	minHeight: '100vh',
 	height: 'max-content',
-	margin: '1rem 8px'
+	margin: '1rem 1.5rem'
 }
 
 function AuthGateway({ children }) {
@@ -46,7 +46,7 @@ function AuthGateway({ children }) {
 							width: 'max-content',
 							backgroundColor: 'transparent',
 							border: 0,
-							margin: '1rem 2rem'
+							margin: '1rem 1.5rem'
 						}}
 					>
 						Go back
