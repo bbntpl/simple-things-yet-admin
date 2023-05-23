@@ -1,88 +1,72 @@
-import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Form, Input, Button, Typography } from 'antd';
 
-import FormErrors from '../../components/FormErrors';
 import { createCategoryRequest } from '../../services/categoryAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { createCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
 import openNotification from '../../lib/openNotification';
 
+const { Title } = Typography;
+
 function CreateCategoryPage() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
-	const [category, setCategory] = useState({
-		name: '',
-		description: ''
-	});
-	const [errorMessages, setErrorMessages] = useState([]);
+	const [form] = Form.useForm();
 
-	const handleChange = (e) => {
-		setCategory(category => ({
-			...category,
-			[e.target.name]: e.target.value
-		}))
-	}
-
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (values) => {
 		try {
-			const response = await createCategoryRequest(category, authorToken);
+			const response = await createCategoryRequest(values, authorToken);
 
 			if (!!response?.errors) {
-				setErrorMessages(response?.errors);
+				form.setFields(
+					response.errors.map(error => ({ name: error.param, errors: [error.msg] }))
+				);
 			} else if (!!response?.error) {
-				setErrorMessages([{ msg: response?.error }]);
+				form.setFields([{ name: 'name', errors: [response?.error] }]);
 			} else {
-				setErrorMessages([]);
 				setTimeout(() => {
-					dispatch(createCategoryReducer(category));
+					dispatch(createCategoryReducer(values));
 					navigate('/dashboard');
 					openNotification({
 						type: 'success',
 						message: 'Successful operation',
-						description: `New category "${category.name}" is successfully submitted`,
-					})
+						description: `New category "${values.name}" is successfully submitted`,
+					});
 				}, 1100);
 			}
 		} catch (error) {
 			console.log(error);
-			setErrorMessages([{ msg: 'An error occurred while submitting the form.' }]);
+			form.setFields([{ name: 'name', errors: ['An error occurred while submitting the form.'] }]);
 		}
-	}
+	};
 
-	return <div>
-		<form>
-			<h1>Create a blog category </h1>
-			<div>
-				<label htmlFor='name'>Category Name: </label>
-				<input
-					id='name'
-					type='text'
+	return (
+		<div>
+			<Form layout='vertical' form={form} onFinish={handleSubmit}>
+				<Title level={3}>Create a new category label for blog</Title>
+				<Form.Item
+					label='Category Name'
 					name='name'
-					value={category.name}
-					onChange={handleChange}
-				/>
-			</div>
-			<div>
-				<label htmlFor='description'>Category Description: </label>
-				<textarea
-					id='description'
-					name='description'
-					value={category.description}
-					onChange={handleChange}
+					rules={[{ required: true, message: 'Input for Category Name is required' }]}
 				>
-				</textarea>
-			</div>
-			<FormErrors errorMessages={errorMessages} />
-			<input
-				type='submit'
-				value='Add category'
-				onClick={handleSubmit}
-			/>
-		</form>
-	</div>
+					<Input />
+				</Form.Item>
+				<Form.Item
+					label='Category Description'
+					name='description'
+				>
+					<Input.TextArea />
+				</Form.Item>
+				<Form.Item>
+					<Button type='primary' htmlType='submit'>
+						Add category
+					</Button>
+				</Form.Item>
+			</Form>
+		</div>
+	);
 }
 
 export default CreateCategoryPage;

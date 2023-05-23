@@ -1,93 +1,84 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
-import { getUserAccount, updateAuthor } from '../services/userAPI';
 import { useSelector } from 'react-redux';
+import { Row, Col, Form, Input, Button, Typography } from 'antd';
+
+import { getUserAccount, updateAuthor } from '../services/userAPI';
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import openNotification from '../lib/openNotification';
+import AuthorComments from '../components/AuthorComments';
 
-function AuthorComments({ commentsArray }) {
-	return <ul>
-		{commentsArray.map(comment => {
-			return <li key={`author-profile_${comment.id}`}>
-				{comment.content}
-			</li>
-		})}
-	</ul>
-}
+const { Title, Text } = Typography;
 
 function ProfilePage() {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
 	const [author, setAuthor] = useState(null);
+	const [form] = Form.useForm();
 
 	useEffect(() => {
 		getUserAccount().then((result) => {
 			setAuthor(result);
-		})
-	}, [])
+			form.setFieldsValue(result);
+		});
+	}, [form]);
 
-	const handleChange = (e) => {
-		e.preventDefault();
-		setAuthor(author => ({
-			...author,
-			[e.target.name]: e.target.value
-		}))
-	}
-
-	const handleAuthorUpdate = (e) => {
-		e.preventDefault();
-		updateAuthor(author, loggedAuthor.token)
+	const handleAuthorUpdate = (values) => {
+		updateAuthor(values, loggedAuthor.token)
 			.then(() => {
 				openNotification({
 					type: 'success',
 					message: 'Operation successful',
 					description: 'Successfully updated author data'
-				})
+				});
 			})
 			.catch(error => {
 				openNotification({
 					type: 'error',
 					message: 'Operation failed',
 					description: error.message
-				})
+				});
 			});
 	}
+
 	const handleQuillChange = (content) => {
-		setAuthor(author => ({
-			...author,
-			bio: content
-		}))
+		form.setFieldsValue({ bio: content });
 	}
 
 	if (author === null) {
 		return;
 	}
 
-	return <div>
-		<div>
-			<form onSubmit={handleAuthorUpdate}>
-				<div>
-					<label htmlFor='name'>Name: </label>
-					<input value={author.name} name='name' onChange={handleChange} />
-				</div>
-				<div>
-					<label htmlFor='email'>Email: </label>
-					<input value={author.email} name='email' onChange={handleChange} />
-				</div>
-				<div>
-					<label htmlFor='bio'>Bio: </label>
-					<ReactQuill
-						theme='snow'
-						value={author.bio}
-						onChange={handleQuillChange}
-					/>
-				</div>
-				<input type='submit' value='Update' />
-			</form>
-		</div>
-		<h1>Comments</h1>
-		{author.comments.length <= 0 ? <p>You have no comments yet.</p>
-			: <AuthorComments />}
-	</div>
+	return (
+		<Row gutter={[16, 16]}>
+			<Col xs={24} md={12}>
+				<Form form={form} onFinish={handleAuthorUpdate}>
+					<Form.Item label='Name' name='name'>
+						<Input />
+					</Form.Item>
+					<Form.Item label='Email' name='email'>
+						<Input />
+					</Form.Item>
+					<Form.Item label='Bio' name='bio'>
+						<ReactQuill
+							theme='snow'
+							onChange={handleQuillChange}
+						/>
+					</Form.Item>
+					<Form.Item>
+						<Button type='primary' htmlType='submit'>
+							Update
+						</Button>
+					</Form.Item>
+				</Form>
+			</Col>
+			<Col xs={24} md={12}>
+				<Title level={3}>Comments</Title>
+				{author.comments.length <= 0
+					? <Text>You have no comments yet.</Text>
+					: <AuthorComments commentsArray={author.comments} />}
+			</Col>
+		</Row>
+	);
 }
 
 export default ProfilePage;

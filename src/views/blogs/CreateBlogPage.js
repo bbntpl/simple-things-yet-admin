@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
+import { fetchCategories } from '../../redux/sliceReducers/categoriesSlice';
 import { createBlogReducer, deleteBlogReducer } from '../../redux/sliceReducers/blogsSlice';
 import { createBlogRequest, deleteBlogRequest } from '../../services/blogAPI';
 import openNotification from '../../lib/openNotification';
@@ -25,7 +25,6 @@ function CreateBlogPage() {
 	}, [dispatch]);
 
 	const handleBlogSubmit = (e) => {
-		e.preventDefault();
 		createBlogRequest(blog, authorToken)
 			.then(data => {
 				setTimeout(() => {

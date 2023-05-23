@@ -1,9 +1,21 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Switch, Input, Checkbox, Spin } from 'antd';
+import {
+	Row,
+	Col,
+	Form,
+	Input,
+	Checkbox,
+	Switch,
+	Spin,
+	Button,
+	Typography
+} from 'antd';
 import ReactQuill from 'react-quill';
 
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
+
+const { Title } = Typography;
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -55,8 +67,6 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 			return checkedValues.includes(cat.name);
 		}).map(cat => cat.id);
 
-		console.log(checkedCategories);
-
 		setBlog(blog => ({
 			...blog,
 			categories: checkedCategories
@@ -73,51 +83,55 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 	}
 
 	return (
-		<div>
-			<form onSubmit={handleBlogSubmit}>
-				<h1>{editing ? 'Update Blog' : 'Create a blog category'}</h1>
-				<div>
-					<label htmlFor='title'>Title: </label>
-					<Input
-						placeholder='Blog title'
-						id='title'
-						value={blog.title}
-						name='title'
-						onChange={handleChange}
-					/>
-				</div>
-				<div>
-					<label htmlFor='categories'>Categories: </label>
-					{
-						blogCategories ? <Checkbox.Group
+		<>
+			<Title level={2}>Create a new blog</Title>
+			<Row justify='center'>
+				<Col xs={24} sm={24} md={18} lg={12}>
+					<Form layout='vertical' onFinish={handleBlogSubmit}>
+						<Form.Item label='Title' name='title'>
+							<Input
+								placeholder='Blog title'
+								value={blog.title}
+								onChange={(e) => handleChange(e)}
+							/>
+						</Form.Item>
+						<Form.Item
+							label='Categories'
 							name='categories'
-							options={getCategoriesOptions(blogCategories)}
-							value={
-								blogCategories
-									.filter(cat => blog.categories.includes(cat.id))
-									.map(cat => cat.name)
+							labelCol={{ span: 4 }}
+							wrapperCol={{ span: 24 }}
+							style={{ display: 'grid', gridTemplateColumns: '1fr', alignItems: 'start' }}
+						>
+							{blogCategories ?
+								<Checkbox.Group
+									style={{ flexWrap: 'wrap' }}
+									options={getCategoriesOptions(blogCategories)}
+									value={blogCategories
+										.filter(cat => blog.categories.includes(cat.id))
+										.map(cat => cat.name)}
+									onChange={(values) => handleCategoriesChange(values)}
+								/> : <Spin />
 							}
-							onChange={handleCategoriesChange} />
-							: <Spin />
-					}
-				</div>
-				<div>
-					<label htmlFor='private'>Private: </label>
-					<Switch defaultChecked={blog.private} name='private' onChange={handleSwitch} />
-				</div>
-				<div>
-					<label htmlFor='content'>Content: </label>
-					<ReactQuill
-						theme='snow'
-						value={blog.content}
-						onChange={handleQuillChange}
-						modules={{ toolbar: toolbarOprions }}
-					/>
-				</div>
-				<input type='submit' value={editing ? 'Update blog' : 'Post blog'} />
-				{editing && <button type='button' onClick={handleBlogDeletion}>Delete</button>}
-			</form>
-		</div>
+						</Form.Item>
+						<Form.Item label='Private' name='private' labelCol={{ span: 5 }} wrapperCol={{ span: 1 }} style={{ dislay: 'inline' }}>
+							<Switch checked={blog.private} onChange={(checked) => handleSwitch(checked)} />
+						</Form.Item>
+						<Form.Item label='Content' name='content'>
+							<ReactQuill
+								theme='snow'
+								value={blog.content}
+								onChange={(content) => handleQuillChange(content)}
+								modules={{ toolbar: toolbarOprions }}
+							/>
+						</Form.Item>
+						<Form.Item>
+							<Button type='primary' htmlType='submit'>{editing ? 'Update blog' : 'Post blog'}</Button>
+							{editing && <Button type='danger' onClick={handleBlogDeletion}>Delete</Button>}
+						</Form.Item>
+					</Form>
+				</Col>
+			</Row>
+		</>
 	);
 }
 
