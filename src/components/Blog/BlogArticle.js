@@ -22,10 +22,13 @@ export default function BlogArticle({ blog }) {
 
 	const blogUpdateDate = moment(updatedAt);
 	const blogCreationDate = moment(createdAt);
-
+	console.log(categories);
 	return (
 		<Card>
-			<Text strong>{isPrivate ? 'Private' : 'Public'}</Text>
+			<Text strong>{isPrivate
+				? 'This blog is not available to the public'
+				: 'This blog is available to the public'}
+			</Text>
 			<Title>{title}</Title>
 			<BlogAuthorInfo author={author} />
 			<div>
@@ -34,10 +37,10 @@ export default function BlogArticle({ blog }) {
 				))}
 			</div>
 			<Row>
-				<Col span={12}>
+				<Col span={12} style={{ textAlign: 'left' }}>
 					<Space>
+						<span>{likes.length}</span>
 						< HeartFilled />
-						<span>{likes}</span>
 					</Space>
 				</Col>
 				<Col span={12} style={{ textAlign: 'right' }}>
@@ -46,7 +49,7 @@ export default function BlogArticle({ blog }) {
 						: <Text type="secondary">blogUpdateDate: {blogUpdateDate.format('LL')}</Text>}
 				</Col>
 			</Row>
-			<Paragraph dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+			<div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
 			<BlogCommentList comments={comments} />
 		</Card>
 	);

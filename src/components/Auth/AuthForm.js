@@ -2,12 +2,23 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { Layout, Form, Input, Button, Typography, Alert, Space } from 'antd';
 
 import { loginUser, registerUser } from '../../services/userAPI';
 import { loginAuthor, selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice';
 import LS from '../../utils/localStorage';
 import openNotification from '../../lib/openNotification';
 import FormErrors from '../FormErrors';
+
+const { Title } = Typography;
+const { Content } = Layout;
+
+const contentStyle = {
+	textAlign: 'center',
+	minHeight: '100vh',
+	height: 'max-content',
+	margin: '1rem 8px'
+}
 
 function AuthForm({ authFormType }) {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
@@ -62,8 +73,7 @@ function AuthForm({ authFormType }) {
 		return await loginUser(authorToLogin);
 	}
 
-	const submitAuthorForm = async (e) => {
-		e.preventDefault();
+	const submitAuthorForm = async () => {
 		try {
 			let response;
 			if (authFormType === 'register') {
@@ -95,51 +105,94 @@ function AuthForm({ authFormType }) {
 		setPassword('');
 		setErrorMessages([]);
 	}
+	return (
+		<Content style={contentStyle}>
+			{loggedAuthor && <Navigate to='/dashboard' replace={true} />}
 
-	return <div>
-		{
-			loggedAuthor && (
-				<Navigate to='/dashboard' replace={true} />
-			)
-		}
-		<h1>{
-			authFormType === 'register'
-				? 'Author Registration'
-				: 'Login as author'}
-		</h1>
-		<form onSubmit={submitAuthorForm}>
+			<Title level={2}>
+				{authFormType === 'register'
+					? 'Author Registration'
+					: 'Login as author'}
+			</Title>
+
+			<Form onFinish={submitAuthorForm}>
+				{authFormType === 'register' &&
+					<Form.Item
+						label='Email'
+						name='email'
+						labelCol={{ span: 10 }}
+						wrapperCol={{ span: 20 }}
+						style={{ maxWidth: 500 }}
+					>
+						<Input
+							value={email}
+							onChange={e => setEmail(e.target.value)}
+							style={{
+								minWidth: 200,
+								width: '100%'
+							}}
+						/>
+					</Form.Item>
+				}
+
+				<Form.Item
+					label='Username'
+					name='username'
+					labelCol={{ span: 10 }}
+					wrapperCol={{ span: 20 }}
+					style={{ maxWidth: 500 }}
+				>
+					<Input
+						value={username}
+						onChange={e => setUsername(e.target.value)}
+					/>
+				</Form.Item>
+
+				<Form.Item
+					label='Password'
+					name='password'
+					labelCol={{ span: 10 }}
+					wrapperCol={{ span: 20 }}
+					style={{ maxWidth: 500 }}
+				>
+					<Input.Password value={password} onChange={e => setPassword(e.target.value)} />
+				</Form.Item>
+
+				{errorMessages.length !== 0 &&
+					<Space>
+						<Alert
+							message={<FormErrors errorMessages={errorMessages} />}
+							type='error'
+						/>
+					</Space>
+				}
+
+				<Form.Item style={{ margin: '1rem' }}>
+					<Space size='middle'>
+						<Button type='primary' htmlType='submit'>
+							{authFormType === 'register' ? 'Register' : 'Login'}
+						</Button>
+
+						{authFormType === 'register' &&
+							<Button onClick={resetFields}>Clear</Button>
+						}
+					</Space>
+				</Form.Item>
+			</Form>
+
 			{
-				authFormType === 'register' &&
-				<div>
-					<label htmlFor='email'>Email: </label>
-					<input value={email} onChange={e => setEmail(e.target.value)} />
-				</div>
+				authFormType === 'register' ?
+					<div>
+						<p>Already have an account?</p>
+						<Link to='/login'>Login now</Link>
+					</div>
+					: <div>
+						<p>Don't have an account?</p>
+						<Link to='/register'>Create a new account</Link>
+					</div>
 			}
-			<div>
-				<label htmlFor='username'>Username: </label>
-				<input type='text' value={username} onChange={e => setUsername(e.target.value)} />
-			</div>
-			<div>
-				<label htmlFor='password'>Password: </label>
-				<input type='password' value={password} onChange={e => setPassword(e.target.value)} />
-			</div>
-			{errorMessages.length !== 0 && <FormErrors errorMessages={errorMessages} />}
-			<div>
-				<input type='submit' value={authFormType === 'register' ? 'Register' : 'Login'} />
-				{authFormType === 'register' && <button onClick={resetFields}>Clear</button>}
-			</div>
-		</form>
-		{authFormType === 'register' ?
-			<div>
-				<p>Already have an account?</p>
-				<Link to='/login'>Login now</Link>
-			</div>
-			: <div>
-				<p>Don't have an account?</p>
-				<Link to='/register'>Create a new account</Link>
-			</div>
-		}
-	</div>
+		</Content >
+	)
 }
 
 AuthForm.propTypes = {

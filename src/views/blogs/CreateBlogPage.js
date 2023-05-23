@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import 'react-quill/dist/quill.snow.css';
 
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
@@ -31,7 +30,7 @@ function CreateBlogPage() {
 			.then(data => {
 				setTimeout(() => {
 					dispatch(createBlogReducer(blog));
-					navigate(`/blog/:${data.id}`);
+					navigate(`/blog/${data.id}`);
 					openNotification({
 						type: 'success',
 						message: 'Successful operation',

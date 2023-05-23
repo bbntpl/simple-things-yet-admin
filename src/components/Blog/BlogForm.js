@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Input, Checkbox, Spin } from 'antd';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
 
@@ -54,7 +53,9 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 	const handleCategoriesChange = (checkedValues) => {
 		const checkedCategories = blogCategories.filter(cat => {
 			return checkedValues.includes(cat.name);
-		});
+		}).map(cat => cat.id);
+
+		console.log(checkedCategories);
 
 		setBlog(blog => ({
 			...blog,
@@ -91,11 +92,14 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 						blogCategories ? <Checkbox.Group
 							name='categories'
 							options={getCategoriesOptions(blogCategories)}
-							value={blog.categories.map(cat => cat.name)}
+							value={
+								blogCategories
+									.filter(cat => blog.categories.includes(cat.id))
+									.map(cat => cat.name)
+							}
 							onChange={handleCategoriesChange} />
 							: <Spin />
 					}
-
 				</div>
 				<div>
 					<label htmlFor='private'>Private: </label>

@@ -1,4 +1,4 @@
-const { axiosInstance, requestOptions } = require('./axiosInstance');
+import axiosInstance, { requestOptions } from './axiosInstance';
 const baseDirectory = '/blogs';
 
 export const fetchBlogsRequest = async () => {

@@ -6,7 +6,7 @@ import {
 	useDispatch,
 	useSelector
 } from 'react-redux';
-import { Layout } from 'antd';
+import { Layout, Space } from 'antd';
 
 import { logoutAuthor, selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 
@@ -17,10 +17,6 @@ function NavHeader() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const loggedAuthor = useSelector(selectLoggedAuthor);
-
-	const handleGoBack = () => {
-		navigate(-1)
-	};
 
 	const handleAuthorLogout = () => {
 		dispatch(logoutAuthor());
@@ -33,18 +29,30 @@ function NavHeader() {
 		style={{
 			display: 'flex',
 			alignItems: 'center',
-			justifyContent: 'space-between'
+			justifyContent: 'flex-end',
+			color: '#00000f'
 		}}
 	>
-		<div>
-			<button onClick={handleGoBack}>Go back</button>
-		</div>
-		<div>
-			<Link to='/profile'>{loggedAuthor.name}</Link>
-			<button onClick={handleAuthorLogout}>
+		<Space>
+			<Link to='/profile'
+				style={{ color: 'aliceblue' }}
+			>
+				<strong>
+					{loggedAuthor.name}
+				</strong>
+			</Link>
+			<button
+				style={{
+					color: 'aliceblue',
+					textDecoration: 'underline',
+					border: 0,
+					backgroundColor: 'transparent'
+				}}
+				onClick={handleAuthorLogout}
+			>
 				logout
 			</button>
-		</div>
+		</Space>
 	</Header>
 }
 

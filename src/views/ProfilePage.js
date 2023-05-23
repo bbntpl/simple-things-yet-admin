@@ -4,7 +4,6 @@ import { getUserAccount, updateAuthor } from '../services/userAPI';
 import { useSelector } from 'react-redux';
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import openNotification from '../lib/openNotification';
-import 'react-quill/dist/quill.snow.css';
 
 function AuthorComments({ commentsArray }) {
 	return <ul>
