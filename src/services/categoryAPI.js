@@ -12,6 +12,15 @@ export const fetchCategoriesRequest = async () => {
 	}
 }
 
+export const fetchCategoryByIdRequest = async (categoryId) => {
+	try {
+		const response = await axiosInstance.get(`${baseDirectory}/${categoryId}`);
+		return response.data;
+	} catch (error) {
+		throw new Error(`${error} (during category fetch by ID)`);
+	}
+}
+
 export const createCategoryRequest = async (category, token) => {
 	try {
 		const response = await axiosInstance.post(
@@ -27,10 +36,10 @@ export const createCategoryRequest = async (category, token) => {
 	}
 }
 
-export const updateCategoryRequest = (category, token) => {
+export const updateCategoryRequest = (categoryId, category, token) => {
 	try {
 		const response = axiosInstance.put(
-			`${baseDirectory}/`,
+			`${baseDirectory}/${categoryId}`,
 			category,
 			requestOptions(token)
 		);

@@ -17,16 +17,19 @@ function CreateBlogPage() {
 		title: '',
 		content: '',
 		categories: [],
-		private: true
+		isPrivate: true
 	});
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		dispatch(fetchCategories())
 	}, [dispatch]);
 
-	const handleBlogSubmit = (e) => {
+	const handleBlogSubmit = () => {
+		setIsLoading(true);
 		createBlogRequest(blog, authorToken)
 			.then(data => {
+				setIsLoading(false);
 				setTimeout(() => {
 					dispatch(createBlogReducer(blog));
 					navigate(`/blog/${data.id}`);
@@ -35,31 +38,34 @@ function CreateBlogPage() {
 						message: 'Successful operation',
 						description: `New blog "${blog.title}" is successfully created`,
 					})
-				}, 1100);
+				}, 1100)
 			})
 			.catch(error => {
-				throw new Error(error);
+				setIsLoading(false);
+				openNotification({
+					type: 'error',
+					message: 'Operation failed',
+					description: error.message,
+				})
 			});
 	}
 
 	const handleBlogDeletion = (blogId) => {
 		deleteBlogRequest()
 			.then(() => {
-				setTimeout(() => {
-					dispatch(deleteBlogReducer)
-					navigate('/blogs');
-					openNotification({
-						type: 'success',
-						message: 'Operation successful',
-						description: `The blog with id ${blogId} is successfully deleted`
-					})
-				}, 1100);
+				dispatch(deleteBlogReducer)
+				navigate('/blogs');
+				openNotification({
+					type: 'success',
+					message: 'Operation successful',
+					description: `The blog with id ${blogId} is successfully deleted`
+				})
 			})
 			.catch(() => {
 				openNotification({
 					type: 'error',
 					message: 'Operation failed',
-					description: `An error occurred while trying to delete the blog with id ${blogId}`
+					description: `An error occurred while trying to delete the blog with id ${blogId} `
 				})
 			})
 	}
@@ -71,6 +77,7 @@ function CreateBlogPage() {
 			handleBlogSubmit={handleBlogSubmit}
 			handleBlogDeletion={handleBlogDeletion}
 			editing={false}
+			isLoading={isLoading}
 		/>
 	</div>
 }

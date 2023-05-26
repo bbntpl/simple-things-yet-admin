@@ -9,6 +9,7 @@ import {
 import { Layout, Space } from 'antd';
 
 import { logoutAuthor, selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
+import { HomeFilled } from '@ant-design/icons';
 
 const { Header } = Layout;
 
@@ -20,19 +21,29 @@ function NavHeader() {
 
 	const handleAuthorLogout = () => {
 		dispatch(logoutAuthor());
-		setTimeout(() => {
-			navigate('/login');
-		}, 1500);
+		navigate('/login');
 	}
 
 	return <Header
 		style={{
 			display: 'flex',
 			alignItems: 'center',
-			justifyContent: 'flex-end',
+			justifyContent: 'space-between',
 			color: '#00000f'
 		}}
 	>
+		<button
+			onClick={() => navigate('/')}
+			style={{
+				backgroundColor: 'transparent',
+				border: 0
+			}}
+		>
+			<HomeFilled style={{
+				color: 'aliceblue',
+				cursor: 'pointer',
+			}} />
+		</button>
 		<Space>
 			<Link to='/profile'
 				style={{ color: 'aliceblue' }}

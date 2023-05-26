@@ -21,6 +21,7 @@ export const fetchBlogByIdRequest = async (id) => {
 
 export const createBlogRequest = async (blog, token) => {
 	try {
+		console.log(blog.categories);
 		const response = await axiosInstance.post(
 			`${baseDirectory}/`,
 			blog,

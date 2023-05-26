@@ -4,8 +4,8 @@ export default function FormErrors({ errorMessages }) {
 	const getErrorList = () => {
 		return <ul>
 			{
-				errorMessages.map((err) => {
-					return <li key={err.msg}>{err.msg}</li>;
+				errorMessages.map((err, index) => {
+					return <li key={index}>{err.msg}</li>;
 				})
 			}
 		</ul>
@@ -14,7 +14,7 @@ export default function FormErrors({ errorMessages }) {
 		{
 			errorMessages.length !== 0 &&
 			<Alert
-				message={<FormErrors errorMessages={getErrorList} />}
+				message={getErrorList()}
 				type='error'
 			/>
 		}

@@ -2,7 +2,7 @@ import { Typography, Avatar } from 'antd';
 
 export default function BlogAuthorInfo({ author }) {
 	return (
-		<div>
+		<div style={{ margin: '1rem' }}>
 			<Typography.Text strong>Written by: {author.name}</Typography.Text>
 			<br />
 			<Avatar src={'https://avatars.githubusercontent.com/u/96958013?v=4author.avatarUrl'} />

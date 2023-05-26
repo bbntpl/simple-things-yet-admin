@@ -14,6 +14,7 @@ import ProfilePage from './views/ProfilePage';
 import CreateBlogPage from './views/blogs/CreateBlogPage';
 import BlogsPage from './views/blogs/BlogsPage';
 import BlogPage from './views/blogs/BlogPage';
+import BlogsPageByCategory from './views/blogs/BlogsPageByCategory';
 import UpdateBlogPage from './views/blogs/UpdateBlogPage';
 import ViewersPage from './views/viewers/ViewersPage';
 import ViewerPage from './views/viewers/ViewerPage';
@@ -80,6 +81,12 @@ function App() {
 									<UpdateBlogPage />
 								</AuthGateway>
 							} >
+							</Route>
+							<Route path='/blogs/category/:categoryName' element={
+								<AuthGateway>
+									<BlogsPageByCategory />
+								</AuthGateway>
+							}>
 							</Route>
 							<Route exact path='/viewers' element={
 								<AuthGateway>

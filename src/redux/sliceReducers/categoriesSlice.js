@@ -30,7 +30,8 @@ const categoriesSlice = createSlice({
 		});
 	},
 });
-export const selectCategory = (state) => state.category;
+export const selectCategory = (name) => (state) =>
+	state.categories.find(cat => cat.name === name);
 export const selectCategories = (state) => state.categories;
 export const {
 	createCategoryReducer,

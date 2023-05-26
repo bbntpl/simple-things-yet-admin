@@ -1,10 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { createBlogRequest } from '../../services/blogAPI';
+import { fetchBlogsRequest } from '../../services/blogAPI';
 
-const initializeBlogs = createAsyncThunk('blogs/initializeBlogs',
+export const initializeBlogs = createAsyncThunk('blogs/initializeBlogs',
 	async () => {
-		const response = await createBlogRequest();
-		return response.data;
+		const response = await fetchBlogsRequest();
+		return response;
 	})
 
 const blogsSlice = createSlice({
@@ -31,6 +31,7 @@ const blogsSlice = createSlice({
 	},
 });
 
+export const selectBlogs = (state) => state.blogs;
 export const {
 	createBlogReducer,
 	deleteBlogReducer,

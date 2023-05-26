@@ -33,7 +33,14 @@ const toolbarOprions = [
 	['clean'],
 ];
 
-function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing }) {
+export default function BlogForm({
+	blog,
+	setBlog,
+	handleBlogSubmit,
+	handleBlogDeletion,
+	editing,
+	isLoading,
+}) {
 	const dispatch = useDispatch();
 	const blogCategories = useSelector(selectCategories) || null;
 
@@ -58,7 +65,7 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 	const handleSwitch = (checked) => {
 		setBlog(blog => ({
 			...blog,
-			private: checked
+			isPrivate: checked
 		}))
 	}
 
@@ -92,6 +99,7 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 							<Input
 								placeholder='Blog title'
 								value={blog.title}
+								name='title'
 								onChange={(e) => handleChange(e)}
 							/>
 						</Form.Item>
@@ -113,8 +121,8 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 								/> : <Spin />
 							}
 						</Form.Item>
-						<Form.Item label='Private' name='private' labelCol={{ span: 5 }} wrapperCol={{ span: 1 }} style={{ dislay: 'inline' }}>
-							<Switch checked={blog.private} onChange={(checked) => handleSwitch(checked)} />
+						<Form.Item label='Private' name='isPrivate' labelCol={{ span: 5 }} wrapperCol={{ span: 1 }} style={{ dislay: 'inline' }}>
+							<Switch checked={blog.isPrivate} onChange={(checked) => handleSwitch(checked)} />
 						</Form.Item>
 						<Form.Item label='Content' name='content'>
 							<ReactQuill
@@ -125,7 +133,13 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 							/>
 						</Form.Item>
 						<Form.Item>
-							<Button type='primary' htmlType='submit'>{editing ? 'Update blog' : 'Post blog'}</Button>
+							<Button
+								type='primary'
+								htmlType='submit'
+								loading={isLoading}
+							>
+								{editing ? 'Update blog' : 'Post blog'}
+							</Button>
 							{editing && <Button type='danger' onClick={handleBlogDeletion}>Delete</Button>}
 						</Form.Item>
 					</Form>
@@ -134,5 +148,3 @@ function BlogForm({ blog, setBlog, handleBlogSubmit, handleBlogDeletion, editing
 		</>
 	);
 }
-
-export default BlogForm;
