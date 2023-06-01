@@ -105,7 +105,7 @@ function AuthForm({ authFormType }) {
 				}
 			} catch (error) {
 				setIsLoading(false);
-				setErrorMessages([{ msg: 'An error occurred while submitting the form.' }]);
+				setErrorMessages([{ msg: error.message }]);
 			}
 		}, 1100)
 	}
@@ -178,7 +178,6 @@ function AuthForm({ authFormType }) {
 							</Space>
 						</Form.Item>
 					</Form>
-
 					{
 						authFormType === 'register' ?
 							<div>

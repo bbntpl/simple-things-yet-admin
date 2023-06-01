@@ -27,27 +27,27 @@ function CreateBlogPage() {
 
 	const handleBlogSubmit = () => {
 		setIsLoading(true);
-		createBlogRequest(blog, authorToken)
-			.then(data => {
-				setIsLoading(false);
-				setTimeout(() => {
-					dispatch(createBlogReducer(blog));
+		setTimeout(() => {
+			createBlogRequest(blog, authorToken)
+				.then(data => {
+					setIsLoading(false);
+					dispatch(createBlogReducer(data));
 					navigate(`/blog/${data.id}`);
 					openNotification({
 						type: 'success',
 						message: 'Successful operation',
 						description: `New blog "${blog.title}" is successfully created`,
 					})
-				}, 1100)
-			})
-			.catch(error => {
-				setIsLoading(false);
-				openNotification({
-					type: 'error',
-					message: 'Operation failed',
-					description: error.message,
 				})
-			});
+				.catch(error => {
+					setIsLoading(false);
+					openNotification({
+						type: 'error',
+						message: 'Operation failed',
+						description: error.message,
+					})
+				});
+		}, 1100);
 	}
 
 	const handleBlogDeletion = (blogId) => {

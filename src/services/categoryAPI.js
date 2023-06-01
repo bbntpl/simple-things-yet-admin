@@ -50,3 +50,15 @@ export const updateCategoryRequest = (categoryId, category, token) => {
 		}
 	}
 }
+
+export const deleteCategoryRequest = (categoryId, token) => {
+	try {
+		const response = axiosInstance.delete(
+			`${baseDirectory}/${categoryId}`,
+			requestOptions(token)
+		);
+		return response.data;
+	} catch (error) {
+		throw new Error(error);
+	}
+}

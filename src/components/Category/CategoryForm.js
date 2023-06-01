@@ -1,5 +1,11 @@
-import { Form, Typography, Button, Input } from 'antd';
+import { Form, Typography, Button, Input, Space, Popconfirm } from 'antd';
 import { useEffect } from 'react';
+import { deleteCategoryRequest } from '../../services/categoryAPI';
+import openNotification from '../../lib/openNotification';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
+import { deleteCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
 
@@ -12,6 +18,11 @@ export default function CategoryForm(props) {
 		isLoading
 	} = props;
 
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const authorToken = useSelector(selectToken);
+	const areThereBlogs = category?.blogs.length
+
 	useEffect(() => {
 		if (isEditing && category) {
 			const { name, description } = category;
@@ -19,8 +30,49 @@ export default function CategoryForm(props) {
 		}
 	}, [isEditing, category, form])
 
+	function handleCategoryDeletion(categoryId) {
+		return async () => {
+			try {
+				await deleteCategoryRequest(categoryId, authorToken);
+				dispatch(deleteCategoryReducer(categoryId));
+				navigate('/blogs');
+				openNotification({
+					type: 'success',
+					description: 'Category successfully deleted'
+				})
+			} catch (error) {
+				openNotification({
+					type: 'error',
+					message: 'operation failed',
+					description: error.message
+				})
+			}
+		}
+	}
 	return (
 		<div>
+			{
+				isEditing &&
+				<Space wrap direction='horizontal'>
+					<Popconfirm
+						title={`Delete the category "${category?.name}"`}
+						description='Are you sure you want to delete this category?'
+						onConfirm={handleCategoryDeletion(category?.id)}
+						okText='Yes'
+						cancelText='No'
+					>
+						<Button
+							danger
+							disabled={areThereBlogs}
+						>
+							Delete the category
+						</Button>
+					</Popconfirm>
+					{areThereBlogs ? <strong>
+						You must delete all of {category?.name}-related blogs before category deletion.
+					</strong> : null}
+				</Space>
+			}
 			<Form layout='vertical' form={form} onFinish={handleSubmit}>
 				<Title level={3}>
 					{isEditing ? 'Edit category'

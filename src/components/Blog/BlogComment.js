@@ -4,9 +4,11 @@ import { Comment } from '@ant-design/compatible'
 import moment from 'moment';
 import { Link } from 'react-router-dom';
 import { UserOutlined } from '@ant-design/icons';
+import DOMPurify from 'dompurify';
 
 export default function BlogComment({ comment }) {
 	const getUserInitialState = (comment) => {
+		console.log(comment);
 		if (comment.author) {
 			return {
 				...comment.author,
@@ -27,7 +29,9 @@ export default function BlogComment({ comment }) {
 			};
 		}
 	};
+
 	const [user, setUser] = useState(() => getUserInitialState(comment));
+	const sanitizedContent = DOMPurify.sanitize(comment.content)
 
 	useEffect(() => {
 		setUser(getUserInitialState(comment));
@@ -47,9 +51,7 @@ export default function BlogComment({ comment }) {
 				/>
 			}
 			content={
-				<p>
-					{comment.content}
-				</p>
+				<div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
 			}
 			datetime={
 				<Tooltip title={moment().format('YYYY-MM-DD HH:mm:ss')}>
