@@ -9,13 +9,12 @@ import {
 	Switch,
 	Spin,
 	Button,
-	Typography
+	Popconfirm,
+	Space,
 } from 'antd';
 import ReactQuill from 'react-quill';
 
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
-
-const { Title } = Typography;
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -89,9 +88,9 @@ export default function BlogForm({
 		})
 	}
 
+	console.log(blog);
 	return (
 		<>
-			<Title level={2}>Create a new blog</Title>
 			<Row justify='center'>
 				<Col xs={24} sm={24} md={18} lg={12}>
 					<Form layout='vertical' onFinish={handleBlogSubmit}>
@@ -133,14 +132,23 @@ export default function BlogForm({
 							/>
 						</Form.Item>
 						<Form.Item>
-							<Button
-								type='primary'
-								htmlType='submit'
-								loading={isLoading}
-							>
-								{editing ? 'Update blog' : 'Post blog'}
-							</Button>
-							{editing && <Button type='danger' onClick={handleBlogDeletion}>Delete</Button>}
+							<Space>
+								<Button
+									type='primary'
+									htmlType='submit'
+									loading={isLoading}
+								>
+									{editing ? 'Update blog' : 'Post blog'}
+								</Button>
+								{editing && <Popconfirm
+									title='Delete the blog'
+									description='Are you sure you want to delete this blog'
+									onConfirm={() => handleBlogDeletion(blog.id)}
+									okText='YEs'
+								>
+									<Button danger>Delete</Button>
+								</Popconfirm>}
+							</Space>
 						</Form.Item>
 					</Form>
 				</Col>

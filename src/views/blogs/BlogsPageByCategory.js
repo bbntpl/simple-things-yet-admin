@@ -1,4 +1,4 @@
-import { Form, Spin } from 'antd';
+import { Form, Layout, Spin } from 'antd';
 import CategoryForm from '../../components/Category/CategoryForm';
 import BlogList from '../../components/Blog/BlogList';
 import { useParams } from 'react-router-dom';
@@ -74,7 +74,7 @@ export default function BlogsPageByCategory() {
 		return <div>This category does not exist.</div>
 	}
 
-	return <div>
+	return <Layout>
 		<CategoryForm
 			isEditing={true}
 			category={category}
@@ -85,5 +85,5 @@ export default function BlogsPageByCategory() {
 			headerText={`Blogs under category ${categoryName}`}
 			blogs={blogsByCategory}
 		/>
-	</div>
+	</Layout>
 }

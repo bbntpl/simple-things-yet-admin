@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Spin, Collapse, Divider } from 'antd';
+import { Spin, Collapse, Layout } from 'antd';
 
 import { initializeBlogs, selectBlogs } from '../../redux/sliceReducers/blogsSlice';
 import { selectCategories } from '../../redux/sliceReducers/categoriesSlice';
 import CategoryItemList from '../../components/Category/CategoryItemList';
 import { fetchCategories } from '../../redux/sliceReducers/categoriesSlice';
 import BlogList from '../../components/Blog/BlogList';
-
 
 function BlogsPage() {
 	const dispatch = useDispatch()
@@ -18,18 +17,19 @@ function BlogsPage() {
 		dispatch(initializeBlogs());
 		dispatch(fetchCategories());
 	}, [dispatch])
+
 	if (!Array.isArray(blogs) && !Array.isArray(categories)) {
 		return <Spin />
 	}
-	return <div>
-		<Divider orientation='left'>Blog Categories</Divider>
+
+	return <Layout>
 		<Collapse size='large'>
 			<Collapse.Panel header={'Categories'}>
 				<CategoryItemList categories={categories} />
 			</Collapse.Panel>
 		</Collapse>
 		<BlogList headerText='Recent Blogs' blogs={blogs} />
-	</div>
+	</Layout>
 }
 
 export default BlogsPage;

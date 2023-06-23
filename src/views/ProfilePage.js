@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import { useSelector } from 'react-redux';
-import { Row, Col, Form, Input, Button, Typography } from 'antd';
+import { Form, Input, Button, Typography, Layout } from 'antd';
 
 import { getUserAccount, updateAuthor } from '../services/userAPI';
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
@@ -49,35 +49,38 @@ function ProfilePage() {
 	}
 
 	return (
-		<Row gutter={[16, 16]}>
-			<Col xs={24} md={12}>
-				<Form form={form} onFinish={handleAuthorUpdate}>
-					<Form.Item label='Name' name='name'>
-						<Input />
-					</Form.Item>
-					<Form.Item label='Email' name='email'>
-						<Input />
-					</Form.Item>
-					<Form.Item label='Bio' name='bio'>
-						<ReactQuill
-							theme='snow'
-							onChange={handleQuillChange}
-						/>
-					</Form.Item>
-					<Form.Item>
-						<Button type='primary' htmlType='submit'>
-							Update
-						</Button>
-					</Form.Item>
-				</Form>
-			</Col>
-			<Col xs={24} md={12}>
-				<Title level={3}>Comments</Title>
-				{author.comments.length <= 0
+		<Layout>
+			<Form
+				form={form}
+				onFinish={handleAuthorUpdate}
+				labelCol={{ span: 4 }}
+				wrapperCol={{ span: 20 }}
+			>
+				<Form.Item label='Name' name='name'>
+					<Input />
+				</Form.Item>
+				<Form.Item label='Email' name='email'>
+					<Input />
+				</Form.Item>
+				<Form.Item label='Bio' name='bio'>
+					<ReactQuill
+						theme='snow'
+						onChange={handleQuillChange}
+					/>
+				</Form.Item>
+				<Form.Item wrapperCol={{ span: 24 }} style={{ textAlign: 'right' }}>
+					<Button type='primary' htmlType='submit'>
+						Update
+					</Button>
+				</Form.Item>
+			</Form>
+			<Title level={3}>Comments</Title>
+			{
+				author.comments.length <= 0
 					? <Text>You have no comments yet.</Text>
-					: <AuthorComments commentsArray={author.comments} />}
-			</Col>
-		</Row>
+					: <AuthorComments commentsArray={author.comments} />
+			}
+		</Layout >
 	);
 }
 

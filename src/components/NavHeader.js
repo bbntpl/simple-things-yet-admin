@@ -13,7 +13,6 @@ import { HomeFilled } from '@ant-design/icons';
 
 const { Header } = Layout;
 
-
 function NavHeader() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();

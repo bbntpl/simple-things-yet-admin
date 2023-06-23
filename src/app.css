@@ -1,0 +1,27 @@
+/* Responsive Layout CSS */
+.responsive-layout {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	min-height: 100vh;
+	height: max-content;
+	padding: 1.5rem 1rem;
+}
+
+@media (max-width: 767px) {
+	.responsive-layout {
+		width: 100%;
+	}
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+	.responsive-layout {
+		width: 80%;
+	}
+}
+
+@media (min-width: 992px) {
+	.responsive-layout {
+		width: 60%;
+	}
+}

@@ -1,5 +1,5 @@
 import 'react-quill/dist/quill.snow.css';
-import './App.css';
+import './app.css';
 import { Provider } from 'react-redux';
 import {
 	BrowserRouter as Router,
@@ -31,91 +31,89 @@ function App() {
 	return (
 		<Provider store={store}>
 			<Router>
-				<div className='App'>
-					<Layout>
-						<Routes>
-							<Route path='/' element={
-								<AuthGateway>
-									<Dashboard />
-								</AuthGateway>
-							} />
-							<Route path='/dashboard' element={
-								<AuthGateway>
-									<Dashboard />
-								</AuthGateway>
-							} />
-							<Route path='/login' element={<LoginPage />} />
-							<Route path='/register' element={<RegisterPage />} />
-							<Route path='/create-category' element={
-								<AuthGateway>
-									<CreateCategoryPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/create-blog' element={
-								<AuthGateway>
-									<CreateBlogPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/profile' element={
-								<AuthGateway>
-									<ProfilePage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route exact path='/blogs' element={
-								<AuthGateway>
-									<BlogsPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/blog/:id' element={
-								<AuthGateway>
-									<BlogPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/blog/:id/update' element={
-								<AuthGateway>
-									<UpdateBlogPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/blogs/category/:categoryName' element={
-								<AuthGateway>
-									<BlogsPageByCategory />
-								</AuthGateway>
-							}>
-							</Route>
-							<Route exact path='/viewers' element={
-								<AuthGateway>
-									<ViewersPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/viewers/:id' element={
-								<AuthGateway>
-									<ViewerPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route exact path='/comments' element={
-								<AuthGateway>
-									<CommentsPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='/comments/:id' element={
-								<AuthGateway>
-									<CommentPage />
-								</AuthGateway>
-							} >
-							</Route>
-							<Route path='*' element={<NotFoundPage />} />
-						</Routes>
-					</Layout>
-				</div>
+				<Layout>
+					<Routes>
+						<Route path='/' element={
+							<AuthGateway>
+								<Dashboard />
+							</AuthGateway>
+						} />
+						<Route path='/dashboard' element={
+							<AuthGateway>
+								<Dashboard />
+							</AuthGateway>
+						} />
+						<Route path='/login' element={<LoginPage />} />
+						<Route path='/register' element={<RegisterPage />} />
+						<Route path='/create-category' element={
+							<AuthGateway>
+								<CreateCategoryPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/create-blog' element={
+							<AuthGateway>
+								<CreateBlogPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/profile' element={
+							<AuthGateway>
+								<ProfilePage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route exact path='/blogs' element={
+							<AuthGateway>
+								<BlogsPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/blog/:id/update' element={
+							<AuthGateway>
+								<UpdateBlogPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/blog/:id' element={
+							<AuthGateway>
+								<BlogPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/blogs/category/:categoryName' element={
+							<AuthGateway>
+								<BlogsPageByCategory />
+							</AuthGateway>
+						}>
+						</Route>
+						<Route exact path='/viewers' element={
+							<AuthGateway>
+								<ViewersPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/viewers/:id' element={
+							<AuthGateway>
+								<ViewerPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route exact path='/comments' element={
+							<AuthGateway>
+								<CommentsPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='/comments/:id' element={
+							<AuthGateway>
+								<CommentPage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route path='*' element={<NotFoundPage />} />
+					</Routes>
+				</Layout>
 			</Router>
 		</Provider >
 	);

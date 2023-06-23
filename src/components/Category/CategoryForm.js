@@ -1,4 +1,4 @@
-import { Form, Typography, Button, Input, Space, Popconfirm } from 'antd';
+import { Form, Typography, Button, Input, Space, Popconfirm, Row, Col } from 'antd';
 import { useEffect } from 'react';
 import { deleteCategoryRequest } from '../../services/categoryAPI';
 import openNotification from '../../lib/openNotification';
@@ -73,30 +73,34 @@ export default function CategoryForm(props) {
 					</strong> : null}
 				</Space>
 			}
-			<Form layout='vertical' form={form} onFinish={handleSubmit}>
-				<Title level={3}>
-					{isEditing ? 'Edit category'
-						: 'Create a new category label for blog'}
-				</Title>
-				<Form.Item
-					label='Category Name'
-					name='name'
-					rules={[{ required: true, message: 'Input for Category Name is required' }]}
-				>
-					<Input />
-				</Form.Item>
-				<Form.Item
-					label='Category Description'
-					name='description'
-				>
-					<Input.TextArea />
-				</Form.Item>
-				<Form.Item>
-					<Button type='primary' htmlType='submit' loading={isLoading}>
-						{`${isEditing ? 'Update' : 'Add'} category`}
-					</Button>
-				</Form.Item>
-			</Form>
-		</div>
+			<Row justify='center'>
+				<Col xs={24} sm={24} md={18} lg={12}>
+					<Form layout='vertical' form={form} onFinish={handleSubmit}>
+						<Title level={3}>
+							{isEditing ? 'Edit category'
+								: 'Create a new category label for blog'}
+						</Title>
+						<Form.Item
+							label='Category Name'
+							name='name'
+							rules={[{ required: true, message: 'Input for Category Name is required' }]}
+						>
+							<Input />
+						</Form.Item>
+						<Form.Item
+							label='Category Description'
+							name='description'
+						>
+							<Input.TextArea />
+						</Form.Item>
+						<Form.Item>
+							<Button type='primary' htmlType='submit' loading={isLoading}>
+								{`${isEditing ? 'Update' : 'Add'} category`}
+							</Button>
+						</Form.Item>
+					</Form>
+				</Col>
+			</Row>
+		</div >
 	);
 }

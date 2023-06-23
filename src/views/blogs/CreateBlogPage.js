@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { fetchCategories } from '../../redux/sliceReducers/categoriesSlice';
-import { createBlogReducer, deleteBlogReducer } from '../../redux/sliceReducers/blogsSlice';
-import { createBlogRequest, deleteBlogRequest } from '../../services/blogAPI';
+import { createBlogReducer } from '../../redux/sliceReducers/blogsSlice';
+import { createBlogRequest } from '../../services/blogAPI';
 import openNotification from '../../lib/openNotification';
 import BlogForm from '../../components/Blog/BlogForm';
+import Title from 'antd/es/typography/Title';
+import { Layout } from 'antd';
 
 function CreateBlogPage() {
 	const navigate = useNavigate();
@@ -50,36 +52,16 @@ function CreateBlogPage() {
 		}, 1100);
 	}
 
-	const handleBlogDeletion = (blogId) => {
-		deleteBlogRequest()
-			.then(() => {
-				dispatch(deleteBlogReducer)
-				navigate('/blogs');
-				openNotification({
-					type: 'success',
-					message: 'Operation successful',
-					description: `The blog with id ${blogId} is successfully deleted`
-				})
-			})
-			.catch(() => {
-				openNotification({
-					type: 'error',
-					message: 'Operation failed',
-					description: `An error occurred while trying to delete the blog with id ${blogId} `
-				})
-			})
-	}
-
-	return <div>
+	return <Layout>
+		<Title level={2}>Create a new blog</Title>
 		<BlogForm
 			blog={blog}
 			setBlog={setBlog}
 			handleBlogSubmit={handleBlogSubmit}
-			handleBlogDeletion={handleBlogDeletion}
 			editing={false}
 			isLoading={isLoading}
 		/>
-	</div>
+	</Layout>
 }
 
 export default CreateBlogPage;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Typography, Card, Tag, Row, Col, Space, Spin, Button } from 'antd';
+import { Typography, Card, Tag, Row, Col, Space, Spin, Button, Divider } from 'antd';
 import moment from 'moment';
 import DOMPurify from 'dompurify';
 
@@ -40,7 +40,7 @@ export default function BlogArticle({ blog }) {
 	}, [categories])
 
 	const navigateToBlogEditPage = () => {
-		navigate(`./${blog.id}/update`);
+		navigate('./update');
 	}
 
 	if (!populatedCategories || !blog) {
@@ -50,10 +50,12 @@ export default function BlogArticle({ blog }) {
 	return (
 		<div style={{ margin: '1.5rem 2rem' }}>
 			<Card style={{ backgroundColor: 'transparent' }}>
-				<Text strong>{isPrivate
-					? 'This blog is not available to the public'
-					: 'This blog is available to the public'}
-				</Text>
+				<Divider>
+					<Text strong>{isPrivate
+						? 'This blog is not available to the public'
+						: 'This blog is available to the public'}
+					</Text>
+				</Divider>
 				<Button onClick={navigateToBlogEditPage}>
 					Edit Blog
 				</Button>

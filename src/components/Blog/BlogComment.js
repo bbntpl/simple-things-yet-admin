@@ -8,7 +8,6 @@ import DOMPurify from 'dompurify';
 
 export default function BlogComment({ comment }) {
 	const getUserInitialState = (comment) => {
-		console.log(comment);
 		if (comment.author) {
 			return {
 				...comment.author,

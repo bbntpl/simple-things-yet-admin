@@ -8,13 +8,6 @@ import NavHeader from '../components/NavHeader';
 
 const { Content } = Layout;
 
-const contentStyle = {
-	textAlign: 'center',
-	minHeight: '100vh',
-	height: 'max-content',
-	margin: '1rem 1.5rem'
-}
-
 function AuthGateway({ children }) {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -52,9 +45,9 @@ function AuthGateway({ children }) {
 						Go back
 					</button>
 			}
-			<Content style={contentStyle}>
+			<Layout className='responsive-layout'>
 				{children}
-			</Content>
+			</Layout>
 		</>
 	);
 }

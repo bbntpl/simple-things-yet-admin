@@ -92,7 +92,7 @@ function BlogPage() {
 		}, 1100);
 	}
 
-	return <div>
+	return <>
 		{blog
 			? <>
 				<BlogArticle blog={blog} />
@@ -118,7 +118,7 @@ function BlogPage() {
 				<BlogCommentList blogComments={blog.comments} />
 			</>
 			: <Spin />}
-	</div>
+	</>
 }
 
 export default BlogPage;
