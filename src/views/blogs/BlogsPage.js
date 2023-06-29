@@ -10,7 +10,7 @@ import BlogList from '../../components/Blog/BlogList';
 
 function BlogsPage() {
 	const dispatch = useDispatch()
-	const blogs = useSelector(selectBlogs) || null;
+	const blogs = useSelector(selectBlogs).filter(blog => blog.isPublished) || null;
 	const categories = useSelector(selectCategories) || null;
 
 	useEffect(() => {
@@ -28,7 +28,7 @@ function BlogsPage() {
 				<CategoryItemList categories={categories} />
 			</Collapse.Panel>
 		</Collapse>
-		<BlogList headerText='Recent Blogs' blogs={blogs} />
+		<BlogList headerText='Your Blogs' blogs={blogs} />
 	</Layout>
 }
 

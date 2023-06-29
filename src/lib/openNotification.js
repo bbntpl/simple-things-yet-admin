@@ -17,4 +17,12 @@ const openNotification = (options = {}) => {
 	});
 };
 
+export const notifyError = (error, description = 'Operation failed') => {
+	openNotification({
+		type: 'error',
+		description,
+		message: error.message
+	})
+}
+
 export default openNotification;

@@ -5,7 +5,7 @@ import { Form, Input, Button, Typography, Layout } from 'antd';
 
 import { getUserAccount, updateAuthor } from '../services/userAPI';
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
-import openNotification from '../lib/openNotification';
+import openNotification, { notifyError } from '../lib/openNotification';
 import AuthorComments from '../components/AuthorComments';
 
 const { Title, Text } = Typography;
@@ -31,13 +31,7 @@ function ProfilePage() {
 					description: 'Successfully updated author data'
 				});
 			})
-			.catch(error => {
-				openNotification({
-					type: 'error',
-					message: 'Operation failed',
-					description: error.message
-				});
-			});
+			.catch(error => notifyError(error))
 	}
 
 	const handleQuillChange = (content) => {

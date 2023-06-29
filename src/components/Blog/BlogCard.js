@@ -7,17 +7,25 @@ import { HeartOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 export default function BlogCard({ blog }) {
-	const { title, content, likes, publishedAt } = blog;
+	const {
+		title,
+		content,
+		likes,
+		createdAt,
+		publishedAt,
+		isPublished
+	} = blog;
+
 	const navigate = useNavigate();
 
 	const likesCount = likes.length;
-	const formattedDate = moment(publishedAt).format('MMMM Do, YYYY');
+	const displayDate = isPublished ? publishedAt : createdAt;
+	const formattedDate = moment(displayDate).format('MMMM Do, YYYY');
 
 	const sanitizedContent = DOMPurify.sanitize(content);
 	const plainTextContent = convert(sanitizedContent);
-
 	const navigateToBlog = () => {
-		navigate(`/blog/${blog.id}`);
+		navigate(`/blog/${blog.id} ${!blog.isPublished ? '/update' : ''}`);
 	}
 
 	return (
@@ -48,7 +56,7 @@ export default function BlogCard({ blog }) {
 				<Col span={12}>
 					<Space size='small' direction='vertical'>
 						<div>
-							Published on:
+							{isPublished ? 'Published' : 'Created'} on:
 						</div>
 						<div>
 							{formattedDate}

@@ -26,6 +26,7 @@ import AuthGateway from './lib/AuthGateway';
 import store from './redux/store';
 import NotFoundPage from './views/NotFoundPage';
 import { Layout } from 'antd';
+import DraftsPage from './views/blogs/DraftsPage';
 
 function App() {
 	return (
@@ -60,6 +61,12 @@ function App() {
 						<Route path='/profile' element={
 							<AuthGateway>
 								<ProfilePage />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route exact path='/drafts' element={
+							<AuthGateway>
+								<DraftsPage />
 							</AuthGateway>
 						} >
 						</Route>

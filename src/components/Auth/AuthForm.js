@@ -107,7 +107,7 @@ function AuthForm({ authFormType }) {
 				setIsLoading(false);
 				setErrorMessages([{ msg: error.message }]);
 			}
-		}, 1100)
+		}, 500)
 	}
 
 	const resetFields = (e) => {

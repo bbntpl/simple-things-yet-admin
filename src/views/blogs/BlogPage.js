@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Spin, Divider, Form, Button } from 'antd';
 import ReactQuill from 'react-quill';
 
-import openNotification from '../../lib/openNotification';
+import openNotification, { notifyError } from '../../lib/openNotification';
 import { createAuthorCommentRequest } from '../../services/commentAPI';
 import { createAuthorComment } from '../../redux/sliceReducers/commentsSlice';
 import { selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice';
@@ -41,11 +41,7 @@ function BlogPage() {
 				const fetchedBlog = await fetchBlogByIdRequest(id);
 				setBlog(fetchedBlog)
 			} catch (error) {
-				openNotification({
-					type: error,
-					message: 'Operation failed',
-					description: error.message
-				})
+				notifyError(error)
 			}
 		}
 
@@ -83,16 +79,17 @@ function BlogPage() {
 				})
 			} catch (error) {
 				setIsLoading(false);
-				openNotification({
-					type: 'error',
-					message: 'Operation failed',
-					description: error.message
-				})
+				notifyError(error)
 			}
-		}, 1100);
+		}, 500);
 	}
 
 	return <>
+		{
+			(blog && !blog.isPublished) && (
+				<Navigate to={`/blog/${blog.id}/update`} replace={true} />
+			)
+		}
 		{blog
 			? <>
 				<BlogArticle blog={blog} />

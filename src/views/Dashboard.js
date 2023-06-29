@@ -31,7 +31,8 @@ export default function Dashboard() {
 				margin: '1rem 0 1rem 0',
 				justifyContent: 'center'
 			}}>
-				<NavButton text='Collection of blogs' navigateTo='/blogs' />
+				<NavButton text='Saved drafts (unpublished blogs)' navigateTo='/drafts' />
+				<NavButton text='Published blogs' navigateTo='/blogs' />
 				<NavButton text='Collection of comments' navigateTo='/comments' />
 				<NavButton text='Navigate to viewers page' navigateTo='/viewers' />
 			</Space>

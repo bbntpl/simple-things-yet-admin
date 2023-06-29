@@ -19,10 +19,11 @@ export const fetchBlogByIdRequest = async (id) => {
 	}
 }
 
-export const createBlogRequest = async (blog, token) => {
+export const createBlogRequest = async (args) => {
+	const { blog, token, publishAction } = args;
 	try {
 		const response = await axiosInstance.post(
-			`${baseDirectory}/`,
+			`${baseDirectory}/${publishAction}`,
 			blog,
 			requestOptions(token));
 		return response.data;
@@ -31,10 +32,11 @@ export const createBlogRequest = async (blog, token) => {
 	}
 }
 
-export const updateBlogRequest = async (blogId, updatedBlog, token) => {
+export const updateBlogRequest = async (args) => {
+	const { blogId, updatedBlog, token, publishAction } = args;
 	try {
 		const response = await axiosInstance.put(
-			`${baseDirectory}/${blogId}`,
+			`${baseDirectory}/${blogId}/${publishAction}/authors-only`,
 			updatedBlog,
 			requestOptions(token));
 		return response.data;
@@ -51,6 +53,7 @@ export const deleteBlogRequest = async (id, token) => {
 		);
 		return response.data;
 	} catch (error) {
+		console.log(error);
 		throw new Error(`${error} (during blog deletion)`);
 	}
 }

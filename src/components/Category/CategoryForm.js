@@ -1,7 +1,7 @@
 import { Form, Typography, Button, Input, Space, Popconfirm, Row, Col } from 'antd';
 import { useEffect } from 'react';
 import { deleteCategoryRequest } from '../../services/categoryAPI';
-import openNotification from '../../lib/openNotification';
+import openNotification, { notifyError } from '../../lib/openNotification';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { deleteCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
@@ -41,11 +41,7 @@ export default function CategoryForm(props) {
 					description: 'Category successfully deleted'
 				})
 			} catch (error) {
-				openNotification({
-					type: 'error',
-					message: 'operation failed',
-					description: error.message
-				})
+				notifyError(error)
 			}
 		}
 	}

@@ -31,14 +31,18 @@ export const createCategoryRequest = async (category, token) => {
 		return response.data;
 	} catch (error) {
 		if (error.response) {
+			console.log(error.response.data);
 			return error.response.data;
+		} else {
+			console.log(error);
+			throw new Error(`${error} (during category creation)`);
 		}
 	}
 }
 
-export const updateCategoryRequest = (categoryId, category, token) => {
+export const updateCategoryRequest = async (categoryId, category, token) => {
 	try {
-		const response = axiosInstance.put(
+		const response = await axiosInstance.put(
 			`${baseDirectory}/${categoryId}`,
 			category,
 			requestOptions(token)
@@ -46,19 +50,23 @@ export const updateCategoryRequest = (categoryId, category, token) => {
 		return response.data;
 	} catch (error) {
 		if (error.response) {
+			console.log(error.response.data);
 			return error.response.data;
+		} else {
+			console.log(error);
+			throw new Error(`${error} (during category update)`);
 		}
 	}
 }
 
-export const deleteCategoryRequest = (categoryId, token) => {
+export const deleteCategoryRequest = async (categoryId, token) => {
 	try {
-		const response = axiosInstance.delete(
+		const response = await axiosInstance.delete(
 			`${baseDirectory}/${categoryId}`,
 			requestOptions(token)
 		);
 		return response.data;
 	} catch (error) {
-		throw new Error(error);
+		throw new Error(`${error} (during category deletion)`);
 	}
 }
