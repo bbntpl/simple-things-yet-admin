@@ -9,30 +9,33 @@ import { createBlogRequest } from '../../services/blogAPI';
 import openNotification, { notifyError } from '../../lib/openNotification';
 import BlogForm from '../../components/Blog/BlogForm';
 import Title from 'antd/es/typography/Title';
-import { Form, Layout } from 'antd';
+import { Form, Layout, Spin } from 'antd';
+import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
+import { extractIds } from '../../utils/helperFuncs';
 
 function CreateBlogPage() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
 	const blogCategories = useSelector(selectCategories) || null;
+	const blogTags = useSelector(selectTags);
 	const [form] = Form.useForm();
 	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
+	const [isDataReady, setIsDataReady] = useState(false);
 
 	const initialFormValues = {
 		title: '',
 		content: '',
-		categories: [],
+		category: undefined,
+		tags: [],
 		isPrivate: true
 	}
-	useEffect(() => {
-		dispatch(fetchCategories())
-	}, [dispatch]);
 
-	const extractCategoryIds = (categoryNames) => {
-		return blogCategories.filter(cat => categoryNames.includes(cat.name))
-			.map(cat => cat.id);
-	}
+	useEffect(() => {
+		dispatch(fetchTags())
+		dispatch(fetchCategories())
+			.then(() => setIsDataReady(true))
+	}, [dispatch]);
 
 	const handleSuccess = (data, publishAction, blog) => {
 		const navigateTo = `/blog/${data.id}${publishAction === 'save' ? '/update' : ''}`
@@ -51,13 +54,17 @@ function CreateBlogPage() {
 		setIsSubmitBtnLoading(false);
 		form.setFields([{ name: 'title', errors: [data.error] }]);
 	}
+
 	const handleBlogCreate = (publishAction) => {
 		setIsSubmitBtnLoading(true);
 		const blog = form.getFieldsValue();
 		createBlogRequest({
 			blog: {
-				...blog,
-				categories: extractCategoryIds(blog.categories)
+				title: blog.title,
+				content: blog.content,
+				isPrivate: blog.isPrivate,
+				tags: extractIds({ docs: blogTags, values: blog.tags, key: 'name' }),
+				category: extractIds({ docs: blogCategories, values: [blog.category], key: 'name' })[0] || null
 			},
 			token: authorToken,
 			publishAction
@@ -78,11 +85,16 @@ function CreateBlogPage() {
 	const handleBlogSubmit = () => () => handleBlogCreate('publish');
 	const handleSaveDraft = () => () => handleBlogCreate('save');
 
+	if (!isDataReady) {
+		return <Spin />
+	}
+
 	return <Layout>
 		<Title level={3}>Create a new blog</Title>
 		<BlogForm
 			initialFormValues={initialFormValues}
 			blogCategories={blogCategories}
+			blogTags={blogTags}
 			handleBlogSubmit={handleBlogSubmit}
 			handleSaveDraft={handleSaveDraft}
 			isSubmitBtnLoading={isSubmitBtnLoading}

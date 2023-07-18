@@ -5,7 +5,7 @@ The Blog-V1 Frontend Author is a React-based web application designed to provide
 ## Features
 - User authentication and authorization for the only author
 - Create, edit, and delete blog posts
-- Manage categories for blog posts
+- Manage categories/tags for blog posts
 - View, reply to, and manage comments on blog posts
 - Like and unlike comments and replies
 - View and update author profile

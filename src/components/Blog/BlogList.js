@@ -4,7 +4,7 @@ import BlogCard from './BlogCard'
 
 export default function BlogList({ headerText, blogs }) {
 	return <div>
-		<Title level={2}>{headerText}</Title>
+		<Title level={4}>{headerText}</Title>
 		<Space wrap size='large'>
 			{
 				blogs.length > 0

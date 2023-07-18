@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import {
 	Row,
 	Col,
@@ -10,11 +8,9 @@ import {
 	Button,
 	Popconfirm,
 	Space,
-	Spin,
+	Radio,
 } from 'antd';
 import ReactQuill from 'react-quill';
-
-import { fetchCategories } from '../../redux/sliceReducers/categoriesSlice';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -34,6 +30,7 @@ const toolbarOprions = [
 export default function BlogForm({
 	initialFormValues,
 	blogCategories,
+	blogTags,
 	handleSaveDraft,
 	handleBlogSubmit,
 	handleBlogDeletion,
@@ -41,31 +38,21 @@ export default function BlogForm({
 	isSubmitBtnLoading,
 	form,
 }) {
-	const dispatch = useDispatch();
-	const [isLoadingData, setIsLoadingData] = useState(true);
-
-	// Dispatch the fetchCategories inside a useEffect
-	useEffect(() => {
-		dispatch(fetchCategories())
-			.then(() => setIsLoadingData(false))
-			.catch(err => console.error(err));
-	}, [dispatch, setIsLoadingData]);
-
-	const getCategoriesOptions = (blogCategories) => {
+	const getCategoryOptions = (blogCategories) => {
 		return blogCategories.map(cat => ({ label: cat.name, value: cat.name }));
 	}
 
-	const extractCategoryNames = (newCategories) => {
-		const categoryNames = (blogCategories && blogCategories.length > 0)
-			? newCategories.map((catId) => {
-				const categoryObj = blogCategories.find((blogCat) => blogCat.id === catId);
-				return categoryObj.name;
-			}) : []
-		return categoryNames;
+	const getTagOptions = (blogTags) => {
+		return blogTags.map(tag => ({ label: tag.name, value: tag.name }));
 	}
 
-	if(isLoadingData) {
-		return <Spin />
+	const extractTagNames = (newTags) => {
+		const tagNames = (blogTags && blogTags.length > 0)
+			? newTags.map((tagId) => {
+				const tag = blogTags.find((blogTag) => blogTag.id === tagId);
+				return tag.name;
+			}) : []
+		return tagNames;
 	}
 
 	return (
@@ -75,14 +62,11 @@ export default function BlogForm({
 					<Form
 						layout='vertical'
 						form={form}
-						onValuesChange={(changedValues) => {
-							console.log(changedValues);
-						}}
-
 						initialValues={{
 							title: initialFormValues.title,
 							content: initialFormValues.content,
-							categories: extractCategoryNames(initialFormValues.categories),
+							category: initialFormValues.category,
+							tags: extractTagNames(initialFormValues.tags),
 							isPrivate: initialFormValues.isPrivate
 						}}
 					>
@@ -90,16 +74,33 @@ export default function BlogForm({
 							<Input placeholder='Blog title' />
 						</Form.Item>
 						<Form.Item
+							valuePropName='value'
+							label='Select a blog category'
+							name='category'
+							labelCol={{ span: 4 }}
+							wrapperCol={{ span: 24 }}
+							style={{ display: 'grid', gridTemplateColumns: '1fr', alignItems: 'start' }}
+						>
+							<Radio.Group
+								optionType='button'
+								buttonStyle='solid'
+								options={[
+									...getCategoryOptions(blogCategories),
+									{ label: 'none', value: undefined, }
+								]}
+							/>
+						</Form.Item>
+						<Form.Item
 							valuePropName='defaultValue'
-							label='Categories'
-							name='categories'
+							label='Tags'
+							name='tags'
 							labelCol={{ span: 4 }}
 							wrapperCol={{ span: 24 }}
 							style={{ display: 'grid', gridTemplateColumns: '1fr', alignItems: 'start' }}
 						>
 							<Checkbox.Group
 								style={{ flexWrap: 'wrap' }}
-								options={getCategoriesOptions(blogCategories)}
+								options={getTagOptions(blogTags)}
 							/>
 						</Form.Item>
 						<Form.Item

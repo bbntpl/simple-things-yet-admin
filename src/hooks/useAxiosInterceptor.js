@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux';
 import { logoutAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import axiosInstance,
 { isTokenExpiredError } from '../services/axiosInstance';
-import openNotification from '../lib/openNotification';
 
 function useAxiosInterceptor() {
 	const navigate = useNavigate();

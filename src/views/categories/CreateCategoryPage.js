@@ -15,12 +15,20 @@ function CreateCategoryPage() {
 	const authorToken = useSelector(selectToken);
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [file, setFile] = useState(null);
 	const [form] = Form.useForm();
-
+	console.log('rendered category creation form');
 	const handleSubmit = async (values) => {
 		setIsLoading(true);
 		setTimeout(() => {
-			createCategoryRequest(values, authorToken)
+			const formData = new FormData();
+			formData.append('name', values.name);
+			formData.append('description', values.description);
+			if (file) {
+				formData.append('categoryImage', file);
+			}
+
+			createCategoryRequest(formData, authorToken)
 				.then(data => {
 					if (data && data.errors) {
 						setIsLoading(false);
@@ -31,12 +39,12 @@ function CreateCategoryPage() {
 						setIsLoading(false);
 						form.setFields([{ name: 'name', errors: [data.error] }]);
 					} else if (data && !data.error && !data.errors) {
-						dispatch(createCategoryReducer(values));
+						dispatch(createCategoryReducer(data));
 						navigate('/dashboard');
 						openNotification({
 							type: 'success',
 							message: 'Successful operation',
-							description: `New category "${values.name}" is successfully submitted`,
+							description: `New category "${data.name}" is successfully submitted`,
 						});
 					}
 				}).catch(error => {
@@ -48,6 +56,8 @@ function CreateCategoryPage() {
 
 	return <CategoryForm
 		handleSubmit={handleSubmit}
+		file={file}
+		setFile={setFile}
 		form={form}
 		isLoading={isLoading}
 	/>

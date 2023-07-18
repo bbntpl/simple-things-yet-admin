@@ -17,11 +17,11 @@ const openNotification = (options = {}) => {
 	});
 };
 
-export const notifyError = (error, description = 'Operation failed') => {
+export const notifyError = (error, message = 'Operation failed') => {
 	openNotification({
 		type: 'error',
-		description,
-		message: error.message
+		description: error.message,
+		message
 	})
 }
 

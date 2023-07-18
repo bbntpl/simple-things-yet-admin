@@ -31,7 +31,7 @@ const categoriesSlice = createSlice({
 	},
 });
 export const selectCategory = (name) => (state) =>
-	state.categories.find(cat => cat.name === name);
+	state.categories.find(cat => cat.name === name) || null;
 export const selectCategories = (state) => state.categories;
 export const {
 	createCategoryReducer,

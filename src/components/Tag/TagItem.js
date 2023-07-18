@@ -2,12 +2,12 @@ import React from 'react';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-const CategoryItem = ({ category }) => {
-	const { name, blogs } = category;
+const TagItem = ({ tag }) => {
+	const { name, slug, blogs } = tag;
 	const navigate = useNavigate();
 
-	const navigateToCategory = () => {
-		navigate(`./category/${name}`);
+	const navigateToBlogsUnderTagPage = () => {
+		navigate(`../tag/${slug}`);
 	};
 
 	return (
@@ -19,7 +19,7 @@ const CategoryItem = ({ category }) => {
 				padding: '5px',
 				margin: '5px'
 			}}
-			onClick={navigateToCategory}
+			onClick={navigateToBlogsUnderTagPage}
 		>
 			<span style={{ marginRight: '5px' }}>{name}</span>
 			<strong>{blogs.length}</strong>
@@ -27,4 +27,4 @@ const CategoryItem = ({ category }) => {
 	);
 };
 
-export default CategoryItem;
+export default TagItem;

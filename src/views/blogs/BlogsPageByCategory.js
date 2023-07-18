@@ -1,13 +1,15 @@
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Form, Layout, Spin } from 'antd';
+import { useEffect, useState } from 'react';
+
 import CategoryForm from '../../components/Category/CategoryForm';
 import BlogList from '../../components/Blog/BlogList';
-import { useParams } from 'react-router-dom';
-import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import openNotification, { notifyError } from '../../lib/openNotification';
+
 import { updateCategoryRequest } from '../../services/categoryAPI';
 import { fetchCategories, selectCategory, updateCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
-import openNotification, { notifyError } from '../../lib/openNotification';
-import { useEffect, useState } from 'react';
+import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { initializeBlogs, selectBlogs } from '../../redux/sliceReducers/blogsSlice';
 
 export default function BlogsPageByCategory() {
@@ -37,7 +39,6 @@ export default function BlogsPageByCategory() {
 			// set form fields with corresponding values from the category
 			const fieldsToBeEdited = [
 				{ name: 'name', value: category.name },
-				{ name: 'description', value: category.description }
 			];
 			form.setFields(fieldsToBeEdited);
 		}

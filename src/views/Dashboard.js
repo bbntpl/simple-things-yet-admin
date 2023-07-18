@@ -17,7 +17,8 @@ export default function Dashboard() {
 		<Layout>
 			<Space size={[8, 16]} wrap style={{
 				display: 'flex',
-				margin: '1rem 0 1rem 0',
+				marginBottom: '1rem',
+				marginTop: '1rem',
 				justifyContent: 'center'
 			}}>
 				<NavButton text='Create a blog' navigateTo='/create-blog' />
@@ -28,10 +29,12 @@ export default function Dashboard() {
 			</Divider>
 			<Space size={[8, 16]} wrap style={{
 				display: 'flex',
-				margin: '1rem 0 1rem 0',
+				marginBottom: '1rem',
+				marginTop: '1rem',
 				justifyContent: 'center'
 			}}>
-				<NavButton text='Saved drafts (unpublished blogs)' navigateTo='/drafts' />
+				<NavButton text='Saved drafts' navigateTo='/drafts' />
+				<NavButton text='Blog categories' navigateTo='/categories' />
 				<NavButton text='Published blogs' navigateTo='/blogs' />
 				<NavButton text='Collection of comments' navigateTo='/comments' />
 				<NavButton text='Navigate to viewers page' navigateTo='/viewers' />

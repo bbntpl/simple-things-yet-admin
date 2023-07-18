@@ -8,18 +8,34 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteBlogReducer, updateBlogReducer } from '../../redux/sliceReducers/blogsSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { selectCategories } from '../../redux/sliceReducers/categoriesSlice';
+import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
+import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
+import { extractIds } from '../../utils/helperFuncs';
 
 function UpdateBlogPage() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const authorToken = useSelector(selectToken);
 	const blogCategories = useSelector(selectCategories) || null;
+	const blogTags = useSelector(selectTags) || null;
 	const { id } = useParams();
 	const [blog, setBlog] = useState(null)
 	const [form] = Form.useForm()
+	const [isDataReady, setIsDataReady] = useState(false);
 
 	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
+
+	console.log(blogTags, blogCategories);
+	useEffect(() => {
+		console.log(blogTags, blogCategories);
+		if (blogTags && blogCategories) {
+			setIsDataReady(true);
+			return;
+		}
+		dispatch(fetchTags())
+		dispatch(fetchCategories())
+			.then(() => setIsDataReady(true))
+	}, [dispatch, blogTags, blogCategories]);
 
 	useEffect(() => {
 		try {
@@ -34,11 +50,6 @@ function UpdateBlogPage() {
 		}
 	}, [id])
 
-	const extractCategoryIds = (categoryNames) => {
-		return blogCategories.filter(cat => categoryNames.includes(cat.name))
-			.map(cat => cat.id);
-	}
-
 	const handleBlogUpdate = (publishAction) => {
 		setIsSubmitBtnLoading(true);
 		setTimeout(() => {
@@ -46,9 +57,18 @@ function UpdateBlogPage() {
 			const updatedBlog = {
 				...blog,
 				...currentFormValues,
-				categories: extractCategoryIds(currentFormValues.categories)
+				category: extractIds({
+					docs: blogCategories,
+					values: currentFormValues.categories,
+					key: 'name'
+				}),
+				tags: extractIds({
+					docs: blogTags,
+					values: currentFormValues.tags,
+					key: 'name'
+				})
 			}
-			console.log(updatedBlog);
+
 			updateBlogRequest({
 				blogId: blog.id,
 				updatedBlog,
@@ -92,7 +112,7 @@ function UpdateBlogPage() {
 			.catch(error => notifyError(error))
 	}
 
-	if (!blog || !blog === null) {
+	if (!blog || !blog === null || isDataReady) {
 		return <Spin />;
 	}
 

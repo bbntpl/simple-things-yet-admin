@@ -10,10 +10,12 @@ import {
 import LoginPage from './views/auth/LoginPage';
 import RegisterPage from './views/auth/RegisterPage';
 import CreateCategoryPage from './views/categories/CreateCategoryPage';
+import CategoryCollection from './views/categories/CategoryCollection';
 import ProfilePage from './views/ProfilePage';
 import CreateBlogPage from './views/blogs/CreateBlogPage';
 import BlogsPage from './views/blogs/BlogsPage';
 import BlogPage from './views/blogs/BlogPage';
+import BlogsPageByTag from './views/blogs/BlogsPageByTag';
 import BlogsPageByCategory from './views/blogs/BlogsPageByCategory';
 import UpdateBlogPage from './views/blogs/UpdateBlogPage';
 import ViewersPage from './views/viewers/ViewersPage';
@@ -70,6 +72,12 @@ function App() {
 							</AuthGateway>
 						} >
 						</Route>
+						<Route exact path='/categories' element={
+							<AuthGateway>
+								<CategoryCollection />
+							</AuthGateway>
+						} >
+						</Route>
 						<Route exact path='/blogs' element={
 							<AuthGateway>
 								<BlogsPage />
@@ -88,7 +96,14 @@ function App() {
 							</AuthGateway>
 						} >
 						</Route>
-						<Route path='/blogs/category/:categoryName' element={
+						<Route path='/tag/:tagSlug' element={
+							<AuthGateway>
+								<BlogsPageByTag />
+							</AuthGateway>
+						}>
+						</Route>
+
+						<Route path='/category/:categorySlug' element={
 							<AuthGateway>
 								<BlogsPageByCategory />
 							</AuthGateway>

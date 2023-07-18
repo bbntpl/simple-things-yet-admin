@@ -6,8 +6,6 @@ import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import useAutomaticLogoutOnTokenExpiry from '../hooks/useAxiosInterceptor';
 import NavHeader from '../components/NavHeader';
 
-const { Content } = Layout;
-
 function AuthGateway({ children }) {
 	const location = useLocation();
 	const navigate = useNavigate();
