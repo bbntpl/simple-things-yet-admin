@@ -5,8 +5,10 @@ import DOMPurify from 'dompurify';
 
 import BlogAuthorInfo from '../Blog/BlogAuthorInfo';
 import { HeartFilled } from '@ant-design/icons';
-import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
 import { useNavigate } from 'react-router-dom';
+import { fetchTagByIdRequest } from '../../services/tagAPI';
+import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
+import { notifyError } from '../../lib/openNotification';
 
 const { Title, Text } = Typography;
 
@@ -16,13 +18,19 @@ export default function BlogArticle({ blog }) {
 		isPrivate,
 		author,
 		content,
-		categories,
+		category,
+		tags,
 		likes,
 		createdAt,
 		updatedAt,
 	} = blog
 	const navigate = useNavigate();
-	const [populatedCategories, setPopulatedCategories] = useState(null);
+	const [populatedTags, setPopulatedTags] = useState(null);
+	const [blogCategory, setBlogCategory] = useState(null);
+	const [loadingStatus, setLoadingStatus] = useState({
+		isCategoryLoaded: false,
+		areTagsLoaded: false
+	});
 
 	const sanitizedContent = DOMPurify.sanitize(content);
 
@@ -30,20 +38,32 @@ export default function BlogArticle({ blog }) {
 	const blogCreationDate = moment(createdAt);
 
 	useEffect(() => {
-		const promiseCategories = categories.map(id => {
-			return fetchCategoryByIdRequest(id);
+		const promiseTags = tags.map(id => {
+			return fetchTagByIdRequest(id);
 		});
 
-		Promise.all(promiseCategories).then(cat => {
-			setPopulatedCategories(cat);
+		Promise.all(promiseTags).then(tag => {
+			setPopulatedTags(tag);
+			setLoadingStatus(prevStatus => ({ ...prevStatus, areTagsLoaded: true }));
 		});
-	}, [categories])
+	}, [tags])
+
+	useEffect(() => {
+		const initializeBlogCategory = async () => {
+			const fetchedCategory = await fetchCategoryByIdRequest(category);
+			setBlogCategory(fetchedCategory);
+			setLoadingStatus(prevStatus => ({ ...prevStatus, isCategoryLoaded: true }));
+		}
+
+		initializeBlogCategory().catch(err => notifyError(err));
+	}, [category])
 
 	const navigateToBlogEditPage = () => {
 		navigate('./update');
 	}
+	const areAllLoaded = Object.values(loadingStatus).every(status => status === true)
 
-	if (!populatedCategories || !blog) {
+	if (!areAllLoaded || !blog) {
 		return <Spin />
 	}
 
@@ -62,9 +82,10 @@ export default function BlogArticle({ blog }) {
 				<Title>{title}</Title>
 				<BlogAuthorInfo author={author} />
 				<Space wrap>
-					{populatedCategories.map(category => {
+					{populatedTags.map(tag => {
+						console.log(tag); // error in tag.name - tag is returning null
 						return (
-							<Tag color='blue' key={category.id}>{category.name}</Tag>
+							<Tag color='blue' key={tag.id}>{tag.name}</Tag>
 						);
 					})}
 				</Space>
@@ -79,6 +100,7 @@ export default function BlogArticle({ blog }) {
 						{blogUpdateDate.isSame(blogCreationDate, 'day')
 							? <Text type="secondary">Published: {blogCreationDate.format('LL')}</Text>
 							: <Text type="secondary">Last Update: {blogUpdateDate.format('LL')}</Text>}
+						{blogCategory ? <Text type='secondary'> / {blogCategory.name}</Text> : null}
 					</Col>
 				</Row>
 				<div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />

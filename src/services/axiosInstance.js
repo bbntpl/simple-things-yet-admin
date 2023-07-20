@@ -6,12 +6,14 @@ const instance = axios.create({
 });
 
 export const requestOptions = (token, headersProps = {}) => {
-	const options = {
-		headers: {
-			...headersProps,
-			'Authorization': `Bearer ${token}`
-		}
-	};
+	const headers = {
+		...headersProps,
+		'Authorization': `Bearer ${token}`
+	}
+	if (token) {
+		headers['Authorization'] = `Bearer ${token}`;
+	}
+	const options = { headers };
 
 	return options;
 }

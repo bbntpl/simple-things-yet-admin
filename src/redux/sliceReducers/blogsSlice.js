@@ -1,6 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { fetchBlogsRequest } from '../../services/blogAPI';
 
+
+const initialState = {
+	blogs: [],
+	status: 'idle',
+	error: null
+}
+
 export const initializeBlogs = createAsyncThunk('blogs/initializeBlogs',
 	async () => {
 		const response = await fetchBlogsRequest();
@@ -9,33 +16,52 @@ export const initializeBlogs = createAsyncThunk('blogs/initializeBlogs',
 
 const blogsSlice = createSlice({
 	name: 'blogs',
-	initialState: [],
+	initialState,
 	reducers: {
-		createBlogReducer(state, action) {
-			state.push(action.payload)
+		blogAdded(state, action) {
+			state.blogs.push(action.payload)
 		},
-		deleteBlogReducer(state, action) {
-			return state.filter(blog => blog.id !== action.payload);
+		blogDeleted(state, action) {
+			state.blogs = state.blogs.filter(blog => blog.id !== action.payload);
 		},
-		updateBlogReducer(state, action) {
-			const index = state.findIndex(blog => blog.id === action.payload.id);
+		blogUpdated(state, action) {
+			const index = state.blogs.findIndex(blog => blog.id === action.payload.id);
 			if (index > -1) {
-				state[index] = action.payload;
+				state.blogs[index] = action.payload;
 			}
 		}
 	},
 	extraReducers: (builder) => {
-		builder.addCase(initializeBlogs.fulfilled, (_, action) => {
-			return action.payload;
-		})
+		builder
+			.addCase(initializeBlogs.pending, (state, _) => {
+				state.status = 'loading';
+			})
+			.addCase(initializeBlogs.fulfilled, (state, action) => {
+				state.status = 'succeeded';
+				state.blogs = action.payload
+			})
+			.addCase(initializeBlogs.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.error.message;
+			})
 	},
 });
 
-export const selectBlogs = (state) => state.blogs;
+export const selectPublishedBlogs = (state) => state.blogs.blogs.filter(blog => blog.isPublished);
+export const selectDrafts = (state) => state.blogs.blogs.filter(blog => !blog.isPublished);
+export const selectBlogs = (state) => state.blogs.blogs;
+export const selectBlogsWithTag = (tagId) => (state) => {
+	if (!tagId) return;
+	return state.blogs.blogs.filter(blog => blog.tags.includes(tagId));
+}
+export const selectBlogsWithCategory = (catId) => (state) => {
+	return state.blogs.blogs.filter(blog => blog.category === catId);
+}
+
 export const {
-	createBlogReducer,
-	deleteBlogReducer,
-	updateBlogReducer
+	blogAdded,
+	blogDeleted,
+	blogUpdated
 } = blogsSlice.actions;
 
 export default blogsSlice.reducer;

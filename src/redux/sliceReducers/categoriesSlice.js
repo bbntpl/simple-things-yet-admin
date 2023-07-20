@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { fetchCategoriesRequest } from '../../services/categoryAPI';
 
+const initialState = {
+	status: 'idle',
+	categories: [],
+	error: null
+}
+
 export const fetchCategories = createAsyncThunk('categories/fetchCategories',
 	async () => {
 		const response = await fetchCategoriesRequest();
@@ -9,34 +15,44 @@ export const fetchCategories = createAsyncThunk('categories/fetchCategories',
 
 const categoriesSlice = createSlice({
 	name: 'categories',
-	initialState: [],
+	initialState,
 	reducers: {
-		createCategoryReducer(state, action) {
-			state.push(action.payload)
+		categoryAdded(state, action) {
+			state.categories.push(action.payload)
 		},
-		deleteCategoryReducer(state, action) {
-			return state.filter(category => category.id !== action.payload);
+		categoryDeleted(state, action) {
+			state.categories = state.categories.filter(category => category.id !== action.payload);
 		},
-		updateCategoryReducer(state, action) {
-			const index = state.findIndex(category => category.id === action.payload.id);
+		categoryUpdated(state, action) {
+			const index = state.categories.findIndex(category => category.id === action.payload.id);
 			if (index > -1) {
-				state[index] = action.payload;
+				state.categories[index] = action.payload;
 			}
 		}
 	},
 	extraReducers: (builder) => {
-		builder.addCase(fetchCategories.fulfilled, (state, action) => {
-			return action.payload;
-		});
+		builder
+			.addCase(fetchCategories.pending, (state, _) => {
+				state.status = 'loading'
+			})
+			.addCase(fetchCategories.fulfilled, (state, action) => {
+				state.status = 'succeeded';
+				state.categories = action.payload
+			})
+			.addCase(fetchCategories.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.error.message;
+			})
 	},
 });
-export const selectCategory = (name) => (state) =>
-	state.categories.find(cat => cat.name === name) || null;
-export const selectCategories = (state) => state.categories;
+export const selectCategory = (slug) => (state) =>
+	state.categories.categories.find(cat => cat.slug === slug) || null;
+export const selectCategories = (state) => state.categories.categories;
+
 export const {
-	createCategoryReducer,
-	deleteCategoryReducer,
-	updateCategoryReducer
+	categoryAdded,
+	categoryDeleted,
+	categoryUpdated
 } = categoriesSlice.actions;
 
 export default categoriesSlice.reducer;

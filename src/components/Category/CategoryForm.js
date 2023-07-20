@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteCategoryRequest, fetchCategoryImageRequest } from '../../services/categoryAPI';
 import openNotification, { notifyError } from '../../lib/openNotification';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { deleteCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
+import { categoryDeleted } from '../../redux/sliceReducers/categoriesSlice';
 import { DeleteFilled, EyeOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -14,7 +14,7 @@ const { Title } = Typography;
 const areUploadReqsMet = (file) => {
 	const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
 	if (!isJpgOrPng) {
-		notifyError({ messsage: 'You can only upload JPG/PNG file!' });
+		notifyError({ message: 'You can only upload JPG/PNG file!' });
 	}
 	const isLt2M = file.size / 1024 / 1024 < 2;
 	if (!isLt2M) {
@@ -51,21 +51,24 @@ export default function CategoryForm(props) {
 
 	useEffect(() => {
 		if (isEditing && category) {
-			const { name, description, imageId } = category;
-			if (imageId) {
-				fetchCategoryImageRequest(imageId).then(file => {
-					form.setFieldValue({
-						name,
-						description,
-						categoryImage: file
-					});
-				})
-			} else {
-				form.setFieldValue({
-					name,
-					description,
-				});
+			if (category.imageId) {
+				fetchCategoryImageRequest(category.imageId)
+					.then(response => {
+						const blob = new Blob([response.data], { type: response.mime });
+						return blob;
+					})
+					.then(blob => {
+						getBase64(blob, (url) => {
+							setImageURL(url);
+						});
+					})
 			}
+			// set form fields with corresponding values from the category
+			const fieldsToBeEdited = [
+				{ name: 'name', value: category.name },
+				{ name: 'description', value: category.description },
+			];
+			form.setFields(fieldsToBeEdited);
 		}
 	}, [isEditing, category, form])
 
@@ -94,7 +97,7 @@ export default function CategoryForm(props) {
 		return async () => {
 			try {
 				await deleteCategoryRequest(categoryId, authorToken);
-				dispatch(deleteCategoryReducer(categoryId));
+				dispatch(categoryDeleted(categoryId));
 				navigate('/blogs');
 				openNotification({
 					type: 'success',
@@ -135,28 +138,7 @@ export default function CategoryForm(props) {
 
 	return (
 		<div>
-			{
-				isEditing &&
-				<Space wrap direction='horizontal'>
-					<Popconfirm
-						title={`Delete the category "${category?.name}"`}
-						description='Are you sure you want to delete this category?'
-						onConfirm={handleCategoryDeletion(category?.id)}
-						okText='Yes'
-						cancelText='No'
-					>
-						<Button
-							danger
-							disabled={areThereBlogs}
-						>
-							Delete the category
-						</Button>
-					</Popconfirm>
-					{areThereBlogs ? <strong>
-						You must delete all of {category?.name}-related blogs before category deletion.
-					</strong> : null}
-				</Space>
-			}
+
 			<Row justify='center'>
 				<Col xs={24} sm={24} md={18} lg={12}>
 					<Form layout='vertical' form={form} onFinish={handleSubmit}>
@@ -230,6 +212,30 @@ export default function CategoryForm(props) {
 							</Button>
 						</Form.Item>
 					</Form>
+					{
+						isEditing &&
+						<Space wrap direction='horizontal'>
+							<Popconfirm
+								title={`Delete the category "${category?.name}"`}
+								description='Are you sure you want to delete this category?'
+								onConfirm={handleCategoryDeletion(category?.id)}
+								okText='Yes'
+								cancelText='No'
+							>
+								<Button
+									danger
+									disabled={areThereBlogs}
+								>
+									Delete the category
+								</Button>
+							</Popconfirm>
+							{areThereBlogs ? <strong>
+								You must delete all of {category?.name}-related blogs before category deletion.
+							</strong> : null}
+							{category.blogs.length > 0
+								? <p style={{ color: 'gray' }}>Total blogs(drafts/published): {category.blogs.length}</p> : null}
+						</Space>
+					}
 				</Col>
 			</Row>
 		</div >

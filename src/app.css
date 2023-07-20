@@ -1,3 +1,25 @@
+/* Flex CSS */
+.flex-row {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.flex-col {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-col .category-card {
+	flex-grow: 1;
+}
+
+.category-card {
+	width: 100%;
+	max-width: 300px;
+	margin: 10px;
+	height: auto;
+}
+
 /* Responsive Layout CSS */
 .responsive-layout {
 	margin-left: auto;

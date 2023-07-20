@@ -23,9 +23,15 @@ export const fetchCategoryByIdRequest = async (categoryId) => {
 
 export const fetchCategoryImageRequest = async (imageId) => {
 	try {
-		const response = await axiosInstance.get(`${baseDirectory}/image/${imageId}`);
-		console.log(response);
-		return response.data;
+		const response = await axiosInstance.get(
+			`${baseDirectory}/image/${imageId}`,
+			requestOptions(null, { responseType: 'arraybuffer' })
+		);
+
+		return {
+			data: response.data,
+			mime: response.headers['content-type']
+		};
 	} catch (error) {
 		throw new Error(`${error} (during category fetch by ID)`);
 	}
@@ -38,6 +44,7 @@ export const createCategoryRequest = async (category, token) => {
 			category,
 			requestOptions(token)
 		);
+
 		return response.data;
 	} catch (error) {
 		if (error.response) {

@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Form, Layout, Spin } from 'antd';
+import { Divider, Form, Layout, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 
 import CategoryForm from '../../components/Category/CategoryForm';
@@ -8,41 +8,37 @@ import BlogList from '../../components/Blog/BlogList';
 import openNotification, { notifyError } from '../../lib/openNotification';
 
 import { updateCategoryRequest } from '../../services/categoryAPI';
-import { fetchCategories, selectCategory, updateCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
+import { categoryUpdated, fetchCategories, selectCategory } from '../../redux/sliceReducers/categoriesSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { initializeBlogs, selectBlogs } from '../../redux/sliceReducers/blogsSlice';
+import { initializeBlogs, selectPublishedBlogs } from '../../redux/sliceReducers/blogsSlice';
 
 export default function BlogsPageByCategory() {
-	const { categoryName } = useParams();
+	const { categorySlug } = useParams();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
-	const category = useSelector(selectCategory(categoryName));
-	const publishedBlogs = useSelector(selectBlogs).filter(blog => blog?.isPublished);
-	const [blogsByCategory, setBlogsByCategory] = useState(null);
+	const category = useSelector(selectCategory(categorySlug));
+	const publishedBlogs = useSelector(selectPublishedBlogs);
+	const categoryStatus = useSelector(state => state.categories.status);
+	const blogStatus = useSelector(state => state.blogs.status);
 
 	const [form] = Form.useForm();
+	const [blogsByCategory, setBlogsByCategory] = useState(null);
 
 	useEffect(() => {
-		if (!category) {
-			dispatch(fetchCategories());
+		if (categoryStatus === 'idle') {
+			dispatch(fetchCategories())
 		}
-		if (category) {
+		if (blogStatus === 'idle') {
 			dispatch(initializeBlogs());
 		}
-	}, [dispatch, category])
+	}, [dispatch, categoryStatus, blogStatus]);
 
 	useEffect(() => {
-		if (category && publishedBlogs) {
+		if (categoryStatus === 'succeeded' && blogStatus === 'succeeded') {
 			const filteredBlogs = publishedBlogs.filter(blog => category.blogs.includes(blog.id));
 			setBlogsByCategory(filteredBlogs);
-
-			// set form fields with corresponding values from the category
-			const fieldsToBeEdited = [
-				{ name: 'name', value: category.name },
-			];
-			form.setFields(fieldsToBeEdited);
-		}
-	}, [publishedBlogs, category, form])
+		};
+	}, [categoryStatus, blogStatus])
 
 	const handleUpdate = async (values) => {
 		try {
@@ -54,7 +50,7 @@ export default function BlogsPageByCategory() {
 			} else if (!!response?.error) {
 				form.setFields([{ name: 'name', errors: [response?.error] }]);
 			} else {
-				dispatch(updateCategoryReducer(values));
+				dispatch(categoryUpdated(values));
 				openNotification({
 					type: 'success',
 					message: 'Successful operation',
@@ -67,12 +63,9 @@ export default function BlogsPageByCategory() {
 		}
 	}
 
-	if (!blogsByCategory) {
+	if (blogsByCategory === null || blogStatus !== 'succeeded'
+		|| categoryStatus !== 'succeeded') {
 		return <Spin />
-	}
-
-	if (!category) {
-		return <div>This category does not exist.</div>
 	}
 
 	return <Layout>
@@ -82,8 +75,9 @@ export default function BlogsPageByCategory() {
 			handleSubmit={handleUpdate}
 			form={form}
 		/>
+		<Divider />
 		<BlogList
-			headerText={`Blogs under category ${categoryName}`}
+			headerText={`Blogs under category ${categorySlug}`}
 			blogs={blogsByCategory}
 		/>
 	</Layout>

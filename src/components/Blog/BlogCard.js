@@ -25,7 +25,7 @@ export default function BlogCard({ blog }) {
 	const sanitizedContent = DOMPurify.sanitize(content);
 	const plainTextContent = convert(sanitizedContent);
 	const navigateToBlog = () => {
-		navigate(`/blog/${blog.id} ${!blog.isPublished ? '/update' : ''}`);
+		navigate(`/blog/${blog.id}${!blog.isPublished ? '/update' : ''}`);
 	}
 
 	return (

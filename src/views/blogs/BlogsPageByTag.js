@@ -1,15 +1,15 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Spin } from 'antd';
-import { useEffect, useState } from 'react';
-
-import BlogList from '../../components/Blog/BlogList';
-
-import { updateTagRequest } from '../../services/tagAPI';
-import { fetchTags, selectTag, updateTagReducer } from '../../redux/sliceReducers/tagsSlice';
-import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { initializeBlogs, selectBlogs } from '../../redux/sliceReducers/blogsSlice';
+import { Button, Divider, Layout, Popconfirm, Space, Spin } from 'antd';
+import { useEffect } from 'react';
 import Title from 'antd/es/typography/Title';
+
+import { notifyError } from '../../lib/openNotification';
+import BlogList from '../../components/Blog/BlogList';
+import { deleteTagRequest, updateTagRequest } from '../../services/tagAPI';
+import { tagDeleted, fetchTags, selectTag, tagUpdated } from '../../redux/sliceReducers/tagsSlice';
+import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
+import { initializeBlogs, selectBlogsWithTag } from '../../redux/sliceReducers/blogsSlice';
 
 export default function BlogsPageByTag() {
 	const { tagSlug } = useParams();
@@ -17,57 +17,91 @@ export default function BlogsPageByTag() {
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
 	const tag = useSelector(selectTag(tagSlug));
-	const publishedBlogs = useSelector(selectBlogs).filter(blog => blog?.isPublished);
-	const [blogsByTag, setBlogsByTag] = useState(null);
+	const tagStatus = useSelector(state => state.tags.status);
+	const blogStatus = useSelector(state => state.blogs.status);
+	const blogs = useSelector(selectBlogsWithTag(tag?.id || null));
 
 	useEffect(() => {
-		if (!tag) {
+		if (tagStatus === 'idle') {
 			dispatch(fetchTags());
 		}
-		if (tag) {
+		if (blogStatus === 'idle') {
 			dispatch(initializeBlogs());
 		}
-	}, [dispatch, tag])
+	}, [blogStatus, dispatch, tagStatus])
 
-
-	useEffect(() => {
-		if (tag && publishedBlogs) {
-			const filteredBlogs = publishedBlogs.filter(blog => tag.blogs.includes(blog.id));
-			// Bookmarked: This does not have sufficient dependencies and cannot add publishedBlogs as it'll
-			// cause infinite loops
-			setBlogsByTag(filteredBlogs);
-		}
-	}, [tag])
+	const handleTagDeletion = async (tagName) => {
+		if (tag.blogs.length) return;
+		deleteTagRequest(tag.id, authorToken)
+			.then(result => {
+				dispatch(tagDeleted(tag.id));
+				navigate(-1);
+			})
+			.catch(err => {
+				notifyError(err);
+			})
+	}
 
 	const handleTagUpdate = async (tagName) => {
 		if (tagName !== tag.name) {
 			updateTagRequest(tag.id, { ...tag, name: tagName }, authorToken)
 				.then(result => {
-					if (result?.error) return;
-					dispatch(updateTagReducer(result));
+					if (result?.error) throw new Error(result.error);
+					dispatch(tagUpdated(result));
 					navigate(`/tag/${result.slug}`);
 				})
 				.catch(err => {
-					console.log(err);
+					notifyError(err);
 				})
 		}
 	}
 
-	if (!blogsByTag) {
+	if (blogStatus !== 'succeeded' || blogStatus !== 'succeeded') {
 		return <Spin />
 	}
 
-	if (!tag) {
+	if (!tag && tagStatus === 'succeeded') {
 		return <div>This tag does not exist.</div>
 	}
 
 	return <Layout>
+
 		<Title level={1} editable={{ onChange: handleTagUpdate }}>
 			{tag.name}
 		</Title>
+		<Space wrap direction='horizontal'
+			style={{
+				display: 'flex',
+				justifyContent: 'center'
+			}}
+		>
+			<Popconfirm
+				title={`Delete the category "${tag?.name}"`}
+				description='Are you sure you want to delete this tag?'
+				onConfirm={() => handleTagDeletion(tag.id)}
+				okText='Yes'
+				cancelText='No'
+			>
+				<Button
+					danger
+					disabled={tag.blogs.length}
+				>
+					Delete the tag
+				</Button>
+			</Popconfirm>
+			{tag.blogs.length ? <strong>
+				You must delete all of {tag?.name}-related blogs before tag deletion.
+			</strong> : null}
+		</Space>
+		<Divider />
 		<BlogList
-			headerText={`Blogs under tag ${tag.name}`}
-			blogs={blogsByTag}
+			headerText={`Published blogs under tag {${tag.name}}`}
+			blogs={blogs.filter(blog => blog.isPublished)}
+		/>
+
+		<BlogList
+			headerText={`Saved Drafts under tag {${tag.name}}`}
+			blogs={blogs.filter(blog => !blog.isPublished)}
 		/>
 	</Layout>
 }

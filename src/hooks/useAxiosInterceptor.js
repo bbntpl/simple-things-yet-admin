@@ -21,6 +21,7 @@ function useAxiosInterceptor() {
 			return response;
 		}, function (error) {
 			const errorMessage = error?.response?.data?.message || error.message;
+			// these type of errors are for form validation
 			const areFormErrorsExists = !!error?.response?.data?.errors;
 			const isSingleErrorExists = !!error?.response?.data?.error;
 			if (isTokenExpiredError(error)) {
@@ -30,6 +31,8 @@ function useAxiosInterceptor() {
 			} else if (areFormErrorsExists || isSingleErrorExists) {
 				return error.response;
 			} else {
+				// throw errors that aren't expected to be part of form validation
+				// it can be used as an error notification
 				throw new Error(errorMessage);
 			}
 		});

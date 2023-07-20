@@ -26,13 +26,13 @@ const formats = [
 
 function BlogPage() {
 	const { id } = useParams();
-	const [blog, setBlog] = useState(null);
-
 	const dispatch = useDispatch();
+
 	const loggedAuthor = useSelector(selectLoggedAuthor);
 	const [newComment, setNewComment] = useState({
 		content: '',
 	});
+	const [blog, setBlog] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {

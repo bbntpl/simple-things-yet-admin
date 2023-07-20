@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { fetchTagsRequest } from '../../services/tagAPI';
 
+const initialState = {
+	tags: [],
+	status: 'idle',
+	error: null
+}
+
 export const fetchTags = createAsyncThunk('tags/fetchTags',
 	async () => {
 		const response = await fetchTagsRequest();
@@ -9,34 +15,44 @@ export const fetchTags = createAsyncThunk('tags/fetchTags',
 
 const tagsSlice = createSlice({
 	name: 'tags',
-	initialState: [],
+	initialState,
 	reducers: {
-		createTagReducer(state, action) {
-			state.push(action.payload)
+		tagAdded(state, action) {
+			state.tags.push(action.payload)
 		},
-		deleteTagReducer(state, action) {
-			return state.filter(tag => tag.id !== action.payload);
+		tagDeleted(state, action) {
+			state.tags = state.tags.filter(tag => tag.id !== action.payload);
 		},
-		updateTagReducer(state, action) {
-			const index = state.findIndex(tag => tag.id === action.payload.id);
+		tagUpdated(state, action) {
+			const index = state.tags.findIndex(tag => tag.id === action.payload.id);
 			if (index > -1) {
-				state[index] = action.payload;
+				state.tags[index] = action.payload;
 			}
 		}
 	},
 	extraReducers: (builder) => {
-		builder.addCase(fetchTags.fulfilled, (state, action) => {
-			return action.payload;
-		});
+		builder
+			.addCase(fetchTags.pending, (state, _) => {
+				state.status = 'loading'
+			})
+			.addCase(fetchTags.fulfilled, (state, action) => {
+				state.status = 'succeeded';
+				state.tags = action.payload
+			})
+			.addCase(fetchTags.rejected, (state, action) => {
+				state.status = 'failed';
+				state.error = action.error.message;
+			})
 	},
 });
-export const selectTag = (slug) => (state) =>
-	state.tags.find(tag => tag.slug === slug) || null;
-export const selectTags = (state) => state.tags;
+export const selectTag = (slug) => (state) => {
+	return state.tags.tags.find(tag => tag.slug === slug) || null;
+}
+export const selectTags = (state) => state.tags.tags;
 export const {
-	createTagReducer,
-	deleteTagReducer,
-	updateTagReducer
+	tagAdded,
+	tagDeleted,
+	tagUpdated
 } = tagsSlice.actions;
 
 export default tagsSlice.reducer;

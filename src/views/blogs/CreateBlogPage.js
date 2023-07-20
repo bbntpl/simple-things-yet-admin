@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
-import { createBlogReducer } from '../../redux/sliceReducers/blogsSlice';
+import { blogAdded } from '../../redux/sliceReducers/blogsSlice';
 import { createBlogRequest } from '../../services/blogAPI';
 import openNotification, { notifyError } from '../../lib/openNotification';
 import BlogForm from '../../components/Blog/BlogForm';
@@ -17,11 +17,13 @@ function CreateBlogPage() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
-	const blogCategories = useSelector(selectCategories) || null;
-	const blogTags = useSelector(selectTags);
+	const categories = useSelector(selectCategories);
+	const tags = useSelector(selectTags);
+	const tagStatus = useSelector(state => state.tags.status);
+	const categoryStatus = useSelector(state => state.categories.status);
+
 	const [form] = Form.useForm();
 	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
-	const [isDataReady, setIsDataReady] = useState(false);
 
 	const initialFormValues = {
 		title: '',
@@ -32,15 +34,18 @@ function CreateBlogPage() {
 	}
 
 	useEffect(() => {
-		dispatch(fetchTags())
-		dispatch(fetchCategories())
-			.then(() => setIsDataReady(true))
-	}, [dispatch]);
+		if (tagStatus === 'idle') {
+			dispatch(fetchTags())
+		}
+		if (categoryStatus === 'idle') {
+			dispatch(fetchCategories())
+		}
+	}, [categoryStatus, dispatch, tagStatus]);
 
 	const handleSuccess = (data, publishAction, blog) => {
 		const navigateTo = `/blog/${data.id}${publishAction === 'save' ? '/update' : ''}`
 		setIsSubmitBtnLoading(false);
-		dispatch(createBlogReducer(data));
+		dispatch(blogAdded(data));
 		navigate(navigateTo);
 		const msgAction = publishAction === 'save' ? 'saved as draft' : 'published';
 		openNotification({
@@ -63,8 +68,8 @@ function CreateBlogPage() {
 				title: blog.title,
 				content: blog.content,
 				isPrivate: blog.isPrivate,
-				tags: extractIds({ docs: blogTags, values: blog.tags, key: 'name' }),
-				category: extractIds({ docs: blogCategories, values: [blog.category], key: 'name' })[0] || null
+				tags: extractIds({ docs: tags, values: blog.tags, key: 'name' }),
+				category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || null
 			},
 			token: authorToken,
 			publishAction
@@ -85,7 +90,7 @@ function CreateBlogPage() {
 	const handleBlogSubmit = () => () => handleBlogCreate('publish');
 	const handleSaveDraft = () => () => handleBlogCreate('save');
 
-	if (!isDataReady) {
+	if (tagStatus !== 'succeeded' || categoryStatus !== 'succeeded') {
 		return <Spin />
 	}
 
@@ -93,8 +98,8 @@ function CreateBlogPage() {
 		<Title level={3}>Create a new blog</Title>
 		<BlogForm
 			initialFormValues={initialFormValues}
-			blogCategories={blogCategories}
-			blogTags={blogTags}
+			blogCategories={categories}
+			blogTags={tags}
 			handleBlogSubmit={handleBlogSubmit}
 			handleSaveDraft={handleSaveDraft}
 			isSubmitBtnLoading={isSubmitBtnLoading}

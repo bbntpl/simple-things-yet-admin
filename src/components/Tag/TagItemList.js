@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import TagItem from './TagItem';
 import { createTagRequest } from '../../services/tagAPI';
-import { createTagReducer } from '../../redux/sliceReducers/tagsSlice';
+import { tagAdded } from '../../redux/sliceReducers/tagsSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 
 export default function TagItemList({ tags }) {
@@ -18,7 +18,7 @@ export default function TagItemList({ tags }) {
 		createTagRequest({ name: newTag }, authorToken)
 			.then((result) => {
 				if (result?.error) return;
-				dispatch(createTagReducer(result));
+				dispatch(tagAdded(result));
 				setNewTag('');
 				inputRef.current.focus();
 			})

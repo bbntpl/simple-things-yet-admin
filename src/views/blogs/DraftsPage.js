@@ -4,18 +4,24 @@ import { useEffect } from 'react';
 
 import BlogList from '../../components/Blog/BlogList';
 import { fetchCategories } from '../../redux/sliceReducers/categoriesSlice';
-import { initializeBlogs, selectBlogs } from '../../redux/sliceReducers/blogsSlice';
+import { initializeBlogs, selectDrafts } from '../../redux/sliceReducers/blogsSlice';
 
 function DraftsPage() {
 	const dispatch = useDispatch();
-	const savedDrafts = useSelector(selectBlogs).filter(blog => !blog.isPublished) || null;
+	const blogStatus = useSelector(state => state.blogs.status);
+	const categoryStatus = useSelector(state => state.categories.status);
+	const savedDrafts = useSelector(selectDrafts);
 
 	useEffect(() => {
-		dispatch(initializeBlogs());
-		dispatch(fetchCategories());
-	}, [dispatch])
+		if (blogStatus === 'idle') {
+			dispatch(initializeBlogs());
+		}
+		if (categoryStatus === 'idle') {
+			dispatch(fetchCategories());
+		}
+	}, [blogStatus, categoryStatus, dispatch])
 
-	if (!Array.isArray(savedDrafts)) {
+	if (blogStatus !== 'succeeded') {
 		return <Spin />
 	}
 

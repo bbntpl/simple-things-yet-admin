@@ -11,6 +11,7 @@ import {
 	Radio,
 } from 'antd';
 import ReactQuill from 'react-quill';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -38,6 +39,8 @@ export default function BlogForm({
 	isSubmitBtnLoading,
 	form,
 }) {
+	const { id } = useParams();
+	const navigate = useNavigate();
 	const getCategoryOptions = (blogCategories) => {
 		return blogCategories.map(cat => ({ label: cat.name, value: cat.name }));
 	}
@@ -65,7 +68,7 @@ export default function BlogForm({
 						initialValues={{
 							title: initialFormValues.title,
 							content: initialFormValues.content,
-							category: initialFormValues.category,
+							category: (blogCategories.find(cat => cat.id === initialFormValues.category) || {}).name || undefined,
 							tags: extractTagNames(initialFormValues.tags),
 							isPrivate: initialFormValues.isPrivate
 						}}
@@ -121,6 +124,15 @@ export default function BlogForm({
 						</Form.Item>
 						<Form.Item>
 							<Space>
+								{
+									initialFormValues.isPublished ?
+										<Button
+											htmlType='dashed'
+											onClick={() => navigate(`/blog/${id}`)}
+										>
+											Preview
+										</Button> : null
+								}
 								<Button
 									htmlType='button'
 									onClick={handleSaveDraft()}
@@ -160,7 +172,7 @@ export default function BlogForm({
 						</Form.Item>
 					</Form>
 				</Col>
-			</Row>
+			</Row >
 		</>
 	);
 }

@@ -4,7 +4,7 @@ import { Form } from 'antd';
 
 import { createCategoryRequest } from '../../services/categoryAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { createCategoryReducer } from '../../redux/sliceReducers/categoriesSlice';
+import { categoryAdded } from '../../redux/sliceReducers/categoriesSlice';
 import openNotification, { notifyError } from '../../lib/openNotification';
 import CategoryForm from '../../components/Category/CategoryForm';
 import { useState } from 'react';
@@ -17,7 +17,7 @@ function CreateCategoryPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [file, setFile] = useState(null);
 	const [form] = Form.useForm();
-	console.log('rendered category creation form');
+
 	const handleSubmit = async (values) => {
 		setIsLoading(true);
 		setTimeout(() => {
@@ -39,7 +39,7 @@ function CreateCategoryPage() {
 						setIsLoading(false);
 						form.setFields([{ name: 'name', errors: [data.error] }]);
 					} else if (data && !data.error && !data.errors) {
-						dispatch(createCategoryReducer(data));
+						dispatch(categoryAdded(data));
 						navigate('/dashboard');
 						openNotification({
 							type: 'success',

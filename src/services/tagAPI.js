@@ -31,10 +31,8 @@ export const createTagRequest = async (tag, token) => {
 		return response.data;
 	} catch (error) {
 		if (error.response) {
-			console.log(error.response.data);
 			return error.response.data;
 		} else {
-			console.log(error);
 			throw new Error(`${error} (during tag creation)`);
 		}
 	}
@@ -50,10 +48,8 @@ export const updateTagRequest = async (tagId, tag, token) => {
 		return response.data;
 	} catch (error) {
 		if (error.response) {
-			console.log(error.response.data);
 			return error.response.data;
 		} else {
-			console.log(error);
 			throw new Error(`${error} (during tag update)`);
 		}
 	}

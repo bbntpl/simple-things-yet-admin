@@ -2,22 +2,28 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Spin, Collapse, Layout } from 'antd';
 
-import { initializeBlogs, selectBlogs } from '../../redux/sliceReducers/blogsSlice';
-import BlogList from '../../components/Blog/BlogList';
+import { initializeBlogs, selectPublishedBlogs } from '../../redux/sliceReducers/blogsSlice';
 import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
+import BlogList from '../../components/Blog/BlogList';
 import TagItemList from '../../components/Tag/TagItemList';
 
 function BlogsPage() {
 	const dispatch = useDispatch()
-	const blogs = useSelector(selectBlogs).filter(blog => blog.isPublished) || null;
-	const tags = useSelector(selectTags) || null;
+	const publishedBlogs = useSelector(selectPublishedBlogs);
+	const blogStatus = useSelector(state => state.blogs.status);
+	const tagStatus = useSelector(state => state.tags.status);
+	const tags = useSelector(selectTags);
 
 	useEffect(() => {
-		dispatch(initializeBlogs());
-		dispatch(fetchTags());
-	}, [dispatch])
+		if (blogStatus === 'idle') {
+			dispatch(initializeBlogs());
+		}
+		if (tagStatus === 'idle') {
+			dispatch(fetchTags());
+		}
+	}, [blogStatus, dispatch, tagStatus])
 
-	if (!Array.isArray(blogs) && !Array.isArray(tags)) {
+	if (blogStatus !== 'succeeded' || tagStatus !== 'succeeded') {
 		return <Spin />
 	}
 
@@ -27,7 +33,7 @@ function BlogsPage() {
 				<TagItemList tags={tags} />
 			</Collapse.Panel>
 		</Collapse>
-		<BlogList headerText='Your Blogs' blogs={blogs} />
+		<BlogList headerText='Your Blogs' blogs={publishedBlogs} />
 	</Layout>
 }
 

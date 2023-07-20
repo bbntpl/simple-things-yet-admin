@@ -6,36 +6,44 @@ import { deleteBlogRequest, fetchBlogByIdRequest, updateBlogRequest } from '../.
 import openNotification, { notifyError } from '../../lib/openNotification';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteBlogReducer, updateBlogReducer } from '../../redux/sliceReducers/blogsSlice';
+import { blogDeleted, blogUpdated, initializeBlogs } from '../../redux/sliceReducers/blogsSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
 import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
 import { extractIds } from '../../utils/helperFuncs';
 
 function UpdateBlogPage() {
+	const { id } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+
 	const authorToken = useSelector(selectToken);
-	const blogCategories = useSelector(selectCategories) || null;
-	const blogTags = useSelector(selectTags) || null;
-	const { id } = useParams();
+	const blogCategories = useSelector(selectCategories);
+	const blogTags = useSelector(selectTags);
+	const categoryStatus = useSelector(state => state.categories.status);
+	const tagStatus = useSelector(state => state.tags.status);
+	const blogStatus = useSelector(state => state.blogs.status);
+
 	const [blog, setBlog] = useState(null)
 	const [form] = Form.useForm()
-	const [isDataReady, setIsDataReady] = useState(false);
 
 	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
 
-	console.log(blogTags, blogCategories);
 	useEffect(() => {
-		console.log(blogTags, blogCategories);
-		if (blogTags && blogCategories) {
-			setIsDataReady(true);
-			return;
+		if (categoryStatus === 'idle') {
+			dispatch(fetchCategories())
 		}
-		dispatch(fetchTags())
-		dispatch(fetchCategories())
-			.then(() => setIsDataReady(true))
-	}, [dispatch, blogTags, blogCategories]);
+
+		if (tagStatus === 'idle') {
+			dispatch(fetchTags())
+		}
+
+		// make sure the blogs is fetched before being updated
+		// if user directly accessed this webpage
+		if (blogStatus === 'idle') {
+			dispatch(initializeBlogs())
+		}
+	}, [dispatch, categoryStatus, tagStatus, blogStatus]);
 
 	useEffect(() => {
 		try {
@@ -59,15 +67,16 @@ function UpdateBlogPage() {
 				...currentFormValues,
 				category: extractIds({
 					docs: blogCategories,
-					values: currentFormValues.categories,
+					values: [currentFormValues.category],
 					key: 'name'
-				}),
+				})[0] || null,
 				tags: extractIds({
 					docs: blogTags,
 					values: currentFormValues.tags,
 					key: 'name'
 				})
 			}
+			// update blog form later
 
 			updateBlogRequest({
 				blogId: blog.id,
@@ -76,8 +85,9 @@ function UpdateBlogPage() {
 				publishAction
 			})
 				.then(data => {
+					if (data?.error) throw new Error(data.error);
 					setIsSubmitBtnLoading(false);
-					dispatch(updateBlogReducer(data));
+					dispatch(blogUpdated(data));
 
 					publishAction === 'publish' && navigate(`/blog/${data.id}`);
 					const msgAction = publishAction === 'save' ? 'updated' : 'published';
@@ -100,7 +110,7 @@ function UpdateBlogPage() {
 	const handleBlogDeletion = () => {
 		deleteBlogRequest(blog.id, authorToken)
 			.then(() => {
-				dispatch(deleteBlogReducer);
+				dispatch(blogDeleted(blog.id));
 				const navigateTo = blog?.isPublished ? '/blogs' : '/drafts';
 				navigate(navigateTo);
 				openNotification({
@@ -112,7 +122,8 @@ function UpdateBlogPage() {
 			.catch(error => notifyError(error))
 	}
 
-	if (!blog || !blog === null || isDataReady) {
+	if (blog === null || categoryStatus !== 'succeeded' ||
+		tagStatus !== 'succeeded' || blogStatus !== 'succeeded') {
 		return <Spin />;
 	}
 
@@ -123,10 +134,12 @@ function UpdateBlogPage() {
 				isPublished: blog.isPublished,
 				content: blog.content,
 				title: blog.title,
-				categories: blog.categories,
+				category: blog.category,
+				tags: blog.tags,
 				isPrivate: blog.isPrivate
 			}}
 			blogCategories={blogCategories}
+			blogTags={blogTags}
 			isEditing={true}
 			handleSaveDraft={handleSaveDraft}
 			handleBlogSubmit={handleBlogSubmit}
