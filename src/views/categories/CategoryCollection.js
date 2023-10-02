@@ -18,9 +18,7 @@ const CategoryCollection = () => {
 		}
 	}, [dispatch, categoryStatus])
 
-	if (categoryStatus !== 'succeeded') {
-		return <Spin />
-	}
+	if (categoryStatus !== 'succeeded') return <Spin />
 
 	return <div>
 		<Title style={{ marginBottom: '3rem' }} level={3}>Blog Categories</Title>

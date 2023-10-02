@@ -1,6 +1,6 @@
-# Blog-V1 Frontend Author
+# Simple Things Yet Admin (My Personal Blog)
 
-The Blog-V1 Frontend Author is a React-based web application designed to provide an intuitive and user-friendly interface for the blog author to manage his/her and interact with his readers through comments/replies.
+STY Admin is a React-based web application designed to provide an intuitive, minimal and user-friendly interface for the blog author to manage his/her blogs and interact with his viewers through comments/replies.
 
 ## Features
 - User authentication and authorization for the only author
@@ -9,3 +9,4 @@ The Blog-V1 Frontend Author is a React-based web application designed to provide
 - View, reply to, and manage comments on blog posts
 - Like and unlike comments and replies
 - View and update author profile
+- View grids of registered users

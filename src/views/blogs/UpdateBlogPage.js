@@ -1,16 +1,20 @@
-import Title from 'antd/es/typography/Title';
-import BlogForm from '../../components/Blog/BlogForm';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Layout, Spin } from 'antd';
-import { deleteBlogRequest, fetchBlogByIdRequest, updateBlogRequest } from '../../services/blogAPI';
-import openNotification, { notifyError } from '../../lib/openNotification';
 import { useEffect, useState } from 'react';
+import { Form, Layout, Spin } from 'antd';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+
+import Title from 'antd/es/typography/Title';
+
+import BlogForm from '../../components/Blog/BlogForm';
+import openNotification, { notifyError } from '../../lib/openNotification';
+
 import { blogDeleted, blogUpdated, initializeBlogs } from '../../redux/sliceReducers/blogsSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
 import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
-import { extractIds } from '../../utils/helperFuncs';
+import { deleteBlogRequest, fetchBlogByIdRequest, updateBlogImageRequest, updateBlogRequest } from '../../services/blogAPI';
+import { extractIds } from '../../helpers';
+import useImageUpload from '../../hooks/useImageUpload';
 
 function UpdateBlogPage() {
 	const { id } = useParams();
@@ -25,6 +29,7 @@ function UpdateBlogPage() {
 	const blogStatus = useSelector(state => state.blogs.status);
 
 	const [blog, setBlog] = useState(null)
+	const [uploadedImage, uploadedImageSetters] = useImageUpload();
 	const [form] = Form.useForm()
 
 	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
@@ -58,6 +63,46 @@ function UpdateBlogPage() {
 		}
 	}, [id])
 
+	const updateBlog = async (args) => {
+		const { updatedBlog, publishAction } = args;
+		try {
+			setIsSubmitBtnLoading(true);
+			const data = await updateBlogRequest({
+				blogId: blog.id,
+				updatedBlog,
+				token: authorToken,
+				publishAction
+			});
+
+			if (uploadedImage.file) {
+				await updateBlogImageRequest({
+					file: uploadedImage.file,
+					token: authorToken,
+					blogId: blog.id
+				});
+			}
+
+			if (data?.error) throw new Error(data.error);
+
+			setIsSubmitBtnLoading(false);
+			dispatch(blogUpdated(data));
+
+			if (publishAction === 'publish') {
+				navigate(`/blog/${data.id}`);
+			}
+
+			const msgAction = publishAction === 'save' ? 'updated' : 'published';
+			openNotification({
+				type: 'success',
+				message: 'Successful operation',
+				description: `Blog "${blog.title}" is successfully ${msgAction}`,
+			});
+		} catch (error) {
+			setIsSubmitBtnLoading(false);
+			notifyError(error);
+		}
+	}
+
 	const handleBlogUpdate = (publishAction) => {
 		setIsSubmitBtnLoading(true);
 		setTimeout(() => {
@@ -76,31 +121,8 @@ function UpdateBlogPage() {
 					key: 'name'
 				})
 			}
-			// update blog form later
 
-			updateBlogRequest({
-				blogId: blog.id,
-				updatedBlog,
-				token: authorToken,
-				publishAction
-			})
-				.then(data => {
-					if (data?.error) throw new Error(data.error);
-					setIsSubmitBtnLoading(false);
-					dispatch(blogUpdated(data));
-
-					publishAction === 'publish' && navigate(`/blog/${data.id}`);
-					const msgAction = publishAction === 'save' ? 'updated' : 'published';
-					openNotification({
-						type: 'success',
-						message: 'Successful operation',
-						description: `Blog "${blog.title}" is successfully ${msgAction}`,
-					})
-				})
-				.catch(error => {
-					setIsSubmitBtnLoading(false);
-					notifyError(error)
-				});
+			updateBlog({ updatedBlog, publishAction });
 		}, 500);
 	}
 
@@ -136,7 +158,8 @@ function UpdateBlogPage() {
 				title: blog.title,
 				category: blog.category,
 				tags: blog.tags,
-				isPrivate: blog.isPrivate
+				isPrivate: blog.isPrivate,
+				imageId: blog.imageId
 			}}
 			blogCategories={blogCategories}
 			blogTags={blogTags}
@@ -145,6 +168,8 @@ function UpdateBlogPage() {
 			handleBlogSubmit={handleBlogSubmit}
 			handleBlogDeletion={handleBlogDeletion}
 			isSubmitBtnLoading={isSubmitBtnLoading}
+			uploadedImage={uploadedImage}
+			uploadedImageSetters={uploadedImageSetters}
 			form={form}
 		/>
 	</Layout>

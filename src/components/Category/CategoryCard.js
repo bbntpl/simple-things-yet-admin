@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const CategoryCard = ({ category }) => {
 	const navigate = useNavigate();
+	const imgSrc = `${process.env.REACT_APP_API_URL}/categories/${category.imageId}/image`;
 
 	const onCardClick = () => {
 		navigate(`../category/${category.slug}`);
@@ -27,7 +28,7 @@ const CategoryCard = ({ category }) => {
 					<img
 						style={{ width: '100%', height: 'auto' }}
 						alt={category.name}
-						src={`${process.env.REACT_APP_API_URL}/categories/image/${category.imageId}`}
+						src={imgSrc}
 						loading='lazy'
 						onLoad={onLoad}
 						onError={onError}

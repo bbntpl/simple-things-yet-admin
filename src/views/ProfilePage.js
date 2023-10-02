@@ -1,54 +1,95 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Form, Input, Button, Typography, Layout } from 'antd';
 
-import { getUserAccount, updateAuthor } from '../services/userAPI';
-import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import openNotification, { notifyError } from '../lib/openNotification';
 import AuthorComments from '../components/AuthorComments';
+import ImageUpload from '../components/ImageUpload';
+
+import {
+	getUserInfo,
+	updateAuthor,
+	updateAuthorImage,
+} from '../services/userAPI';
+import { getImageUrl } from '../services/helper';
+import {
+	selectAuthorInfo,
+	selectLoggedAuthor,
+	updateAuthorInfo
+} from '../redux/sliceReducers/loggedAuthorSlice';
+import useImageUpload from '../hooks/useImageUpload';
 
 const { Title, Text } = Typography;
 
 function ProfilePage() {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
-	const [author, setAuthor] = useState(null);
+	const savedAuthorInfo = useSelector(selectAuthorInfo);
+	const dispatch = useDispatch();
+
+	const [uploadedImage, uploadedImageSetters] = useImageUpload();
+
 	const [form] = Form.useForm();
+	const [author, setAuthor] = useState(savedAuthorInfo || null);
+	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
 	useEffect(() => {
-		getUserAccount().then((result) => {
-			setAuthor(result);
-			form.setFieldsValue(result);
-		});
+		// If saved author info from redus is available then there is no need to do api request
+		// so initialize fields value using the data
+		if (savedAuthorInfo) {
+			form.setFieldsValue(savedAuthorInfo);
+		} else {
+			getUserInfo().then((result) => {
+				setAuthor(result);
+				dispatch(updateAuthorInfo({ info: result }))
+				form.setFieldsValue(result);
+			});
+		}
 	}, [form]);
 
-	const handleAuthorUpdate = (values) => {
-		updateAuthor(values, loggedAuthor.token)
-			.then(() => {
-				openNotification({
-					type: 'success',
-					message: 'Operation successful',
-					description: 'Successfully updated author data'
-				});
-			})
-			.catch(error => notifyError(error))
+	useEffect(() => {
+		const fetchImage = async () => {
+			if (author && author.imageId && !uploadedImage.file) {
+				try {
+					const imageUrl = getImageUrl(`/author/${author.imageId}/image`);
+					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl)
+				} catch (err) {
+					notifyError({ message: err.message });
+				}
+			}
+		};
+
+		fetchImage();
+	}, [author]);
+
+	const handleAuthorUpdate = async (values) => {
+		setIsDataSubmitting(true);
+		try {
+			await updateAuthorImage(uploadedImage.file, loggedAuthor.token);
+			const updatedAuthor = await updateAuthor(values, loggedAuthor.token);
+			dispatch(updateAuthorInfo({ info: updatedAuthor }));
+			openNotification({
+				type: 'success',
+				message: 'Operation successful',
+				description: 'Successfully updated author data and image'
+			});
+		} catch (error) {
+			notifyError(error);
+		} finally {
+			setIsDataSubmitting(false);
+		}
 	}
 
-	const handleQuillChange = (content) => {
-		form.setFieldsValue({ bio: content });
-	}
+	const handleQuillChange = (content) => form.setFieldsValue({ bio: content });
 
-	if (author === null) {
-		return;
-	}
-
+	if (author === null) return;
 	return (
 		<Layout>
 			<Form
 				form={form}
 				onFinish={handleAuthorUpdate}
-				labelCol={{ span: 4 }}
-				wrapperCol={{ span: 20 }}
+				labelCol={{ span: 6 }}
+				wrapperCol={{ span: 18 }}
 			>
 				<Form.Item label='Name' name='name'>
 					<Input />
@@ -62,8 +103,19 @@ function ProfilePage() {
 						onChange={handleQuillChange}
 					/>
 				</Form.Item>
+				<Form.Item label='Upload your picture'>
+					<ImageUpload
+						uploadedImage={uploadedImage}
+						updateUploadedImage={uploadedImageSetters.update}
+						uploadElName='authorImage'
+					/>
+				</Form.Item>
 				<Form.Item wrapperCol={{ span: 24 }} style={{ textAlign: 'right' }}>
-					<Button type='primary' htmlType='submit'>
+					<Button
+						type='primary'
+						htmlType='submit'
+						loading={isDataSubmitting}
+					>
 						Update
 					</Button>
 				</Form.Item>

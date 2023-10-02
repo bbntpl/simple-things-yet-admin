@@ -10,6 +10,7 @@ export default function FormErrors({ errorMessages }) {
 			}
 		</ul>
 	}
+
 	return <>
 		{
 			errorMessages.length !== 0 &&

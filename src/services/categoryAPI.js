@@ -1,6 +1,7 @@
 import axiosInstance, {
 	requestOptions
 } from './axiosInstance';
+import { fetchImageRequest, updateImageRequest } from './helper';
 const baseDirectory = '/categories';
 
 export const fetchCategoriesRequest = async () => {
@@ -23,15 +24,7 @@ export const fetchCategoryByIdRequest = async (categoryId) => {
 
 export const fetchCategoryImageRequest = async (imageId) => {
 	try {
-		const response = await axiosInstance.get(
-			`${baseDirectory}/image/${imageId}`,
-			requestOptions(null, { responseType: 'arraybuffer' })
-		);
-
-		return {
-			data: response.data,
-			mime: response.headers['content-type']
-		};
+		return await fetchImageRequest(`${baseDirectory}/${imageId}/image`);
 	} catch (error) {
 		throw new Error(`${error} (during category fetch by ID)`);
 	}
@@ -54,6 +47,20 @@ export const createCategoryRequest = async (category, token) => {
 			console.log(error);
 			throw new Error(`${error} (during category creation)`);
 		}
+	}
+}
+
+export const updateCategoryImageRequest = async (args) => {
+	const { file, token, categoryId } = args;
+	try {
+		return await updateImageRequest({
+			file,
+			token,
+			formDataName: 'categoryImage',
+			endpoint: `${baseDirectory}/${categoryId}/image`
+		});
+	} catch (error) {
+		throw new Error(`${error} (during category image update)`);
 	}
 }
 

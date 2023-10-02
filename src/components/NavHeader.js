@@ -6,10 +6,11 @@ import {
 	useDispatch,
 	useSelector
 } from 'react-redux';
-import { Layout, Space } from 'antd';
+import { Avatar, Layout, Space } from 'antd';
 
-import { logoutAuthor, selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
+import { logoutAuthor, selectAuthorInfo, selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
 import { HomeFilled } from '@ant-design/icons';
+import { getImageUrl } from '../services/helper';
 
 const { Header } = Layout;
 
@@ -17,12 +18,14 @@ function NavHeader() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const loggedAuthor = useSelector(selectLoggedAuthor);
+	const savedAuthorInfo = useSelector(selectAuthorInfo);
+
+	const avatarSrc = getImageUrl(`/author/${savedAuthorInfo?.imageId}/image`);
 
 	const handleAuthorLogout = () => {
 		dispatch(logoutAuthor());
 		navigate('/login');
 	}
-
 	return <Header
 		style={{
 			display: 'flex',
@@ -47,9 +50,12 @@ function NavHeader() {
 			<Link to='/profile'
 				style={{ color: 'aliceblue' }}
 			>
-				<strong>
-					{loggedAuthor.name}
-				</strong>
+				<Space>
+					<Avatar src={avatarSrc} shape='circle' size={32} />
+					<strong>
+						{loggedAuthor.name}
+					</strong>
+				</Space>
 			</Link>
 			<button
 				style={{

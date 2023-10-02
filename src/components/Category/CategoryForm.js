@@ -1,33 +1,17 @@
-import { Form, Typography, Button, Input, Space, Popconfirm, Row, Col, Upload, Modal } from 'antd';
-import { useEffect, useState } from 'react';
+import { Form, Typography, Button, Input, Space, Popconfirm, Row, Col } from 'antd';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { deleteCategoryRequest, fetchCategoryImageRequest } from '../../services/categoryAPI';
+import ImageUpload from '../ImageUpload';
 import openNotification, { notifyError } from '../../lib/openNotification';
+
+import { deleteCategoryRequest } from '../../services/categoryAPI';
+import { getImageUrl } from '../../services/helper';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { categoryDeleted } from '../../redux/sliceReducers/categoriesSlice';
-import { DeleteFilled, EyeOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
-
-const areUploadReqsMet = (file) => {
-	const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-	if (!isJpgOrPng) {
-		notifyError({ message: 'You can only upload JPG/PNG file!' });
-	}
-	const isLt2M = file.size / 1024 / 1024 < 2;
-	if (!isLt2M) {
-		notifyError({ message: 'Image must be smaller than 2MB' })
-	}
-	return isJpgOrPng && isLt2M;
-};
-
-const getBase64 = (img, callback) => {
-	const reader = new FileReader();
-	reader.addEventListener('load', () => callback(reader.result));
-	reader.readAsDataURL(img);
-};
 
 export default function CategoryForm(props) {
 	const {
@@ -35,33 +19,25 @@ export default function CategoryForm(props) {
 		category = null,
 		handleSubmit,
 		form,
-		isLoading,
-		file,
-		setFile
+		isDataSubmitting,
+		uploadedImage,
+		uploadedImageSetters,
 	} = props;
 
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
-	const areThereBlogs = category?.blogs.length;
-	const [loading, setLoading] = useState(false);
-	const [previewTitle, setPreviewTitle] = useState('');
-	const [previewOpen, setPreviewOpen] = useState(false);
-	const [imageURL, setImageURL] = useState();
+	const areThereBlogs = category?.blogs.length || 0;
 
 	useEffect(() => {
 		if (isEditing && category) {
 			if (category.imageId) {
-				fetchCategoryImageRequest(category.imageId)
-					.then(response => {
-						const blob = new Blob([response.data], { type: response.mime });
-						return blob;
-					})
-					.then(blob => {
-						getBase64(blob, (url) => {
-							setImageURL(url);
-						});
-					})
+				const initializeExistingImageAndFile = async () => {
+					const imageUrl = getImageUrl(`/categories/${category.imageId}/image`);
+					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl);
+				}
+
+				initializeExistingImageAndFile();
 			}
 			// set form fields with corresponding values from the category
 			const fieldsToBeEdited = [
@@ -71,27 +47,6 @@ export default function CategoryForm(props) {
 			form.setFields(fieldsToBeEdited);
 		}
 	}, [isEditing, category, form])
-
-	const resetUpload = () => {
-		setLoading(false);
-		setFile(false);
-		setImageURL();
-	}
-
-	const handleUploadChange = (info) => {
-		if (info.file.status === 'error') {
-			resetUpload();
-			openNotification({
-				type: 'error',
-				message: 'Operation failed',
-				description: 'Something went wrong with the upload',
-			})
-		}
-
-		if (info.file.status === 'uploading') {
-			setLoading(true);
-		}
-	};
 
 	function handleCategoryDeletion(categoryId) {
 		return async () => {
@@ -109,135 +64,74 @@ export default function CategoryForm(props) {
 		}
 	}
 
-	const handlePreview = () => {
-		setPreviewOpen(true);
-		setPreviewTitle(file.name || file.url.substring(file.url.lastIndex('/') + 1));
-	}
-
-	const beforeUpload = (file) => {
-		if (!areUploadReqsMet(file)) {
-			resetUpload();
-			return false;
-		}
-		getBase64(file, (url) => {
-			setLoading(false)
-			setImageURL(url);
-		});
-		setFile(file);
-		return false;
-	}
-
-	const uploadButton = (
-		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-			<div>
-				{loading ? <LoadingOutlined /> : <PlusOutlined />}
-				<div style={{ marginTop: 8 }}>Upload</div>
-			</div>
-		</div>
-	);
-
 	return (
-		<div>
-
-			<Row justify='center'>
-				<Col xs={24} sm={24} md={18} lg={12}>
-					<Form layout='vertical' form={form} onFinish={handleSubmit}>
-						<Title level={3}>
-							{isEditing ? 'Edit category'
-								: 'Create a new category label for blog'}
-						</Title>
-						<Form.Item
-							label='Category Name'
-							name='name'
-							rules={[{ required: true, message: 'Input for Category Name is required' }]}
+		<Row justify='center'>
+			<Col xs={24} sm={24} md={18} lg={12}>
+				<Form layout='vertical' form={form} onFinish={handleSubmit}>
+					<Title level={3}>
+						{isEditing ? 'Edit category'
+							: 'Create a new category label for blog'}
+					</Title>
+					<Form.Item
+						label='Category Name'
+						name='name'
+						rules={[{ required: true, message: 'Input for Category Name is required' }]}
+					>
+						<Input />
+					</Form.Item>
+					<Form.Item
+						label='Category Description'
+						name='description'
+					>
+						<Input.TextArea />
+					</Form.Item>
+					<Form.Item
+						label='Upload cover image'
+						style={{ width: 'max-content' }}
+					>
+						<ImageUpload
+							uploadedImage={uploadedImage}
+							updateUploadedImage={uploadedImageSetters.update}
+							uploadElName='categoryImage'
+						/>
+					</Form.Item>
+					<Form.Item>
+						<Button
+							type='primary'
+							htmlType='submit'
+							loading={isDataSubmitting}
+							disabled={uploadedImage.isLoading}
 						>
-							<Input />
-						</Form.Item>
-						<Form.Item
-							label='Category Description'
-							name='description'
+							{`${isEditing ? 'Update' : 'Add'} category`}
+						</Button>
+					</Form.Item>
+				</Form>
+				{
+					isEditing &&
+					<Space wrap direction='horizontal'>
+						<Popconfirm
+							title={`Delete the category "${category?.name}"`}
+							description='Are you sure you want to delete this category?'
+							onConfirm={handleCategoryDeletion(category?.id)}
+							okText='Yes'
+							cancelText='No'
+							disabled={!!areThereBlogs}
 						>
-							<Input.TextArea />
-						</Form.Item>
-						<Form.Item
-							label='Upload cover image'
-							style={{ width: 'max-content' }}
-						>
-							<Upload
-								name='categoryImage'
-								listType="picture-card"
-								showUploadList={false}
-								beforeUpload={beforeUpload}
-								onRemove={() => {
-									resetUpload();
-								}}
-								onChange={handleUploadChange}
-							>
-								{imageURL ? <img src={imageURL} alt='categoryImage'
-									style={{
-										height: 'auto',
-										maxHeight: '100px',
-										width: 'fit-content',
-										maxWidth: '100%'
-									}} /> : uploadButton}
-							</Upload>
-							{
-								file &&
-								<div style={{ display: 'flex', gap: '1px 10px', margin: '2px 7px' }}>
-									< Button style={{}} onClick={() => handlePreview()}>
-										<EyeOutlined style={{ color: 'gray' }} />
-									</Button>
-									< Button style={{}} onClick={() => resetUpload()}>
-										<DeleteFilled style={{ color: 'red' }} />
-									</Button>
-								</div>
-							}
-							<Modal
-								open={previewOpen}
-								title={previewTitle}
-								footer={null}
-								onCancel={() => setPreviewOpen(false)}
-							>
-								<img alt='cover' style={{ width: '100%' }} src={imageURL} />
-							</Modal>
-						</Form.Item>
-						<Form.Item>
 							<Button
-								type='primary'
-								htmlType='submit'
-								loading={isLoading}
-								disabled={loading}
+								danger
+								disabled={!!areThereBlogs}
 							>
-								{`${isEditing ? 'Update' : 'Add'} category`}
+								Delete the category
 							</Button>
-						</Form.Item>
-					</Form>
-					{
-						isEditing &&
-						<Space wrap direction='horizontal'>
-							<Popconfirm
-								title={`Delete the category "${category?.name}"`}
-								description='Are you sure you want to delete this category?'
-								onConfirm={handleCategoryDeletion(category?.id)}
-								okText='Yes'
-								cancelText='No'
-							>
-								<Button
-									danger
-									disabled={areThereBlogs}
-								>
-									Delete the category
-								</Button>
-							</Popconfirm>
-							{areThereBlogs ? <strong>
-								You must delete all of {category?.name}-related blogs before category deletion.
-							</strong> : null}
-							{category.blogs.length > 0
-								? <p style={{ color: 'gray' }}>Total blogs(drafts/published): {category.blogs.length}</p> : null}
-						</Space>
-					}
-				</Col>
-			</Row>
-		</div >
+						</Popconfirm>
+						{areThereBlogs ? <strong>
+							You must delete all of {category?.name}-related blogs before category deletion.
+						</strong> : null}
+						{category.blogs.length > 0
+							? <p style={{ color: 'gray' }}>Total blogs(drafts/published): {category.blogs.length}</p> : null}
+					</Space>
+				}
+			</Col>
+		</Row>
 	);
 }

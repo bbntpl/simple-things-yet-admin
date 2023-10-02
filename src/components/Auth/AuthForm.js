@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Row, Col, Layout, Form, Input, Button, Typography, Space } from 'antd';
 
-import { loginUser, registerUser } from '../../services/userAPI';
-import { loginAuthor, selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice';
-import LS from '../../utils/localStorage';
+import { getUserInfo, loginUser, registerUser } from '../../services/userAPI';
+import { loginAuthor, selectLoggedAuthor, updateAuthorInfo } from '../../redux/sliceReducers/loggedAuthorSlice';
+
 import openNotification from '../../lib/openNotification';
 import FormErrors from '../FormErrors';
 
@@ -58,13 +58,11 @@ function AuthForm({ authFormType }) {
 		});
 	}
 
-	const handleAuthorLogin = (authorObj) => {
+	const handleAuthorLogin = (authorCredentials) => {
 		const requiredProps = ['token', 'username', 'name'];
-		const isAuthorObjComplete = requiredProps.every(prop => Object.hasOwn(authorObj, prop));
+		const isAuthorObjComplete = requiredProps.every(prop => Object.hasOwn(authorCredentials, prop));
 		if (isAuthorObjComplete) {
-			// save the author (user) locally
-			LS.setItem('loggedAuthor', authorObj);
-			dispatch(loginAuthor(authorObj));
+			dispatch(loginAuthor({ credentials: authorCredentials }));
 		}
 	}
 
@@ -73,6 +71,11 @@ function AuthForm({ authFormType }) {
 			email, username, password
 		}
 		return await registerUser(authorToBeCreated);
+	}
+
+	const saveAuthorInfo = async () => {
+		const result = await getUserInfo();
+		dispatch(updateAuthorInfo({ info: result }));
 	}
 
 	const submitAuthorLogin = async () => {
@@ -89,6 +92,7 @@ function AuthForm({ authFormType }) {
 					response = await submitAuthorRegistration();
 				} else if (authFormType === 'login') {
 					response = await submitAuthorLogin();
+					await saveAuthorInfo();
 					handleAuthorLogin(response);
 				} else {
 					throw new Error('There is something wrong with authFormType...');
@@ -146,7 +150,6 @@ function AuthForm({ authFormType }) {
 								/>
 							</Form.Item>
 						}
-
 						<Form.Item
 							label='Username'
 							name='username'
@@ -157,7 +160,6 @@ function AuthForm({ authFormType }) {
 								onChange={e => setUsername(e.target.value)}
 							/>
 						</Form.Item>
-
 						<Form.Item
 							label='Password'
 							name='password'

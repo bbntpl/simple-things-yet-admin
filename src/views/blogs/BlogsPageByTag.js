@@ -81,6 +81,7 @@ export default function BlogsPageByTag() {
 				onConfirm={() => handleTagDeletion(tag.id)}
 				okText='Yes'
 				cancelText='No'
+				disabled={tag.blogs.length}
 			>
 				<Button
 					danger

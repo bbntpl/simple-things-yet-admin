@@ -11,6 +11,8 @@ import { selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice'
 import { fetchBlogByIdRequest } from '../../services/blogAPI'
 import BlogArticle from '../../components/Blog/BlogArticle';
 import BlogCommentList from '../../components/Blog/BlogCommentList';
+import BlogHeader from '../../components/Blog/BlogHeader';
+import { getImageUrl } from '../../services/helper';
 
 const modules = {
 	toolbar: [
@@ -44,7 +46,6 @@ function BlogPage() {
 				notifyError(error)
 			}
 		}
-
 		initializeBlog();
 	}, [id])
 
@@ -93,7 +94,6 @@ function BlogPage() {
 		{blog
 			? <>
 				<BlogArticle blog={blog} />
-
 				<Divider orientation='left'>New Comment</Divider>
 				<Form onFinish={handleCommentSubmit}>
 					<ReactQuill

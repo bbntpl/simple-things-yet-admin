@@ -12,6 +12,9 @@ import {
 } from 'antd';
 import ReactQuill from 'react-quill';
 import { useNavigate, useParams } from 'react-router-dom';
+import ImageUpload from '../ImageUpload';
+import { useEffect } from 'react';
+import { getImageUrl } from '../../services/helper';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -36,11 +39,14 @@ export default function BlogForm({
 	handleBlogSubmit,
 	handleBlogDeletion,
 	isEditing = false,
-	isSubmitBtnLoading,
+	isDataSubmitting,
+	uploadedImage,
+	uploadedImageSetters,
 	form,
 }) {
 	const { id } = useParams();
 	const navigate = useNavigate();
+
 	const getCategoryOptions = (blogCategories) => {
 		return blogCategories.map(cat => ({ label: cat.name, value: cat.name }));
 	}
@@ -58,6 +64,23 @@ export default function BlogForm({
 		return tagNames;
 	}
 
+	useEffect(() => {
+		if (isEditing) {
+			if (initialFormValues && initialFormValues.imageId) {
+				const imageId = form.getFieldsValue() && form.getFieldsValue().imageId
+					? form.getFieldsValue().imageId
+					: initialFormValues.imageId;
+				console.log(imageId);
+				const initializeExistingImageAndFile = async () => {
+					const imageUrl = getImageUrl(`/blogs/${imageId}/image`);
+					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl);
+				}
+
+				initializeExistingImageAndFile();
+			}
+		}
+	}, [isEditing, form, initialFormValues, uploadedImageSetters])
+
 	return (
 		<>
 			<Row justify='center'>
@@ -70,7 +93,8 @@ export default function BlogForm({
 							content: initialFormValues.content,
 							category: (blogCategories.find(cat => cat.id === initialFormValues.category) || {}).name || undefined,
 							tags: extractTagNames(initialFormValues.tags),
-							isPrivate: initialFormValues.isPrivate
+							isPrivate: initialFormValues.isPrivate,
+							imageId: initialFormValues.imageId
 						}}
 					>
 						<Form.Item label='Title' name='title'>
@@ -107,6 +131,16 @@ export default function BlogForm({
 							/>
 						</Form.Item>
 						<Form.Item
+							label='Upload blog preview image'
+							style={{ width: 'max-content' }}
+						>
+							<ImageUpload
+								uploadedImage={uploadedImage}
+								updateUploadedImage={uploadedImageSetters.update}
+								uploadElName='categoryImage'
+							/>
+						</Form.Item>
+						<Form.Item
 							valuePropName='checked'
 							label='Private'
 							name='isPrivate'
@@ -136,7 +170,7 @@ export default function BlogForm({
 								<Button
 									htmlType='button'
 									onClick={handleSaveDraft()}
-									loading={isSubmitBtnLoading}
+									loading={isDataSubmitting}
 								>
 									{`Save blog ${isEditing ? '' : 'as draft'}`}
 								</Button>
@@ -152,7 +186,7 @@ export default function BlogForm({
 										<Button
 											type='primary'
 											htmlType='submit'
-											loading={isSubmitBtnLoading}
+											loading={isDataSubmitting}
 										>
 											Publish blog
 										</Button>

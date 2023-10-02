@@ -7,10 +7,11 @@ import CategoryForm from '../../components/Category/CategoryForm';
 import BlogList from '../../components/Blog/BlogList';
 import openNotification, { notifyError } from '../../lib/openNotification';
 
-import { updateCategoryRequest } from '../../services/categoryAPI';
+import { updateCategoryImageRequest, updateCategoryRequest } from '../../services/categoryAPI';
 import { categoryUpdated, fetchCategories, selectCategory } from '../../redux/sliceReducers/categoriesSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { initializeBlogs, selectPublishedBlogs } from '../../redux/sliceReducers/blogsSlice';
+import useImageUpload from '../../hooks/useImageUpload';
 
 export default function BlogsPageByCategory() {
 	const { categorySlug } = useParams();
@@ -22,7 +23,10 @@ export default function BlogsPageByCategory() {
 	const blogStatus = useSelector(state => state.blogs.status);
 
 	const [form] = Form.useForm();
+
 	const [blogsByCategory, setBlogsByCategory] = useState(null);
+	const [uploadedImage, uploadedImageSetters] = useImageUpload();
+	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
 	useEffect(() => {
 		if (categoryStatus === 'idle') {
@@ -41,7 +45,13 @@ export default function BlogsPageByCategory() {
 	}, [categoryStatus, blogStatus])
 
 	const handleUpdate = async (values) => {
+		setIsDataSubmitting(true);
 		try {
+			await updateCategoryImageRequest({
+				file: uploadedImage.file,
+				token: authorToken,
+				categoryId: category.id
+			})
 			const response = await updateCategoryRequest(category.id, values, authorToken);
 			if (response?.errors) {
 				form.setFields(
@@ -58,8 +68,9 @@ export default function BlogsPageByCategory() {
 				});
 			}
 		} catch (error) {
-			form.setFields([{ name: 'name', errors: ['An error occurred while submitting the form.'] }]);
 			notifyError(error);
+		} finally {
+			setIsDataSubmitting(false);
 		}
 	}
 
@@ -74,6 +85,9 @@ export default function BlogsPageByCategory() {
 			category={category}
 			handleSubmit={handleUpdate}
 			form={form}
+			uploadedImage={uploadedImage}
+			uploadedImageSetters={uploadedImageSetters}
+			isDataSubmitting={isDataSubmitting}
 		/>
 		<Divider />
 		<BlogList

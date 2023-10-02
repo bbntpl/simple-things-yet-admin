@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
-import LS from '../../utils/localStorage';
+import LS from '../../helpers/local-storage';
 
 const loggedAuthorJSON = LS.getItem('loggedAuthor');
-const initialState = loggedAuthorJSON || null;
+const initialState = loggedAuthorJSON || { credentials: null, info: null };
 
 const loggedAuthorSlice = createSlice({
 	name: 'loggedAuthor',
@@ -10,18 +10,30 @@ const loggedAuthorSlice = createSlice({
 	reducers: {
 		logoutAuthor() {
 			LS.removeItem('loggedAuthor');
-			return null;
+			return { credentials: null, info: null };
 		},
 		loginAuthor(state, action) {
-			return action.payload;
-		}
+			const { credentials } = action.payload;
+			const updatedState = { ...state, credentials };
+			LS.setItem('loggedAuthor', updatedState);
+			return updatedState;
+		},
+		updateAuthorInfo(state, action) {
+			const { info } = action.payload;
+			const updatedState = { ...state, info };
+			LS.setItem('loggedAuthor', updatedState);
+			return updatedState;
+		},
 	}
 });
 
-export const selectLoggedAuthor = (state) => state.loggedAuthor;
-export const selectToken = (state) => state.loggedAuthor.token;
+export const selectLoggedAuthor = (state) => state.loggedAuthor.credentials;
+export const selectToken = (state) => state.loggedAuthor.credentials?.token;
+export const selectAuthorInfo = (state) => state.loggedAuthor.info;
 export const {
 	logoutAuthor,
-	loginAuthor
+	loginAuthor,
+	updateAuthorInfo
 } = loggedAuthorSlice.actions;
+
 export default loggedAuthorSlice.reducer;

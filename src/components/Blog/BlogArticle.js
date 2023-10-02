@@ -9,8 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import { fetchTagByIdRequest } from '../../services/tagAPI';
 import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
 import { notifyError } from '../../lib/openNotification';
+import BlogHeader from './BlogHeader';
+import { getImageUrl } from '../../services/helper';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function BlogArticle({ blog }) {
 	const {
@@ -23,6 +25,7 @@ export default function BlogArticle({ blog }) {
 		likes,
 		createdAt,
 		updatedAt,
+		imageId
 	} = blog
 	const navigate = useNavigate();
 	const [populatedTags, setPopulatedTags] = useState(null);
@@ -31,11 +34,16 @@ export default function BlogArticle({ blog }) {
 		isCategoryLoaded: false,
 		areTagsLoaded: false
 	});
+	const [previewImageUrl, setPreviewImageUrl] = useState(null);
 
 	const sanitizedContent = DOMPurify.sanitize(content);
 
 	const blogUpdateDate = moment(updatedAt);
 	const blogCreationDate = moment(createdAt);
+
+	useEffect(() => {
+		setPreviewImageUrl(getImageUrl(`/blogs/${imageId}/image`))
+	}, [imageId])
 
 	useEffect(() => {
 		const promiseTags = tags.map(id => {
@@ -63,9 +71,7 @@ export default function BlogArticle({ blog }) {
 	}
 	const areAllLoaded = Object.values(loadingStatus).every(status => status === true)
 
-	if (!areAllLoaded || !blog) {
-		return <Spin />
-	}
+	if (!areAllLoaded || !blog) return <Spin />
 
 	return (
 		<div style={{ margin: '1.5rem 2rem' }}>
@@ -79,7 +85,7 @@ export default function BlogArticle({ blog }) {
 				<Button onClick={navigateToBlogEditPage}>
 					Edit Blog
 				</Button>
-				<Title>{title}</Title>
+				<BlogHeader title={title} previewImage={previewImageUrl} />
 				<BlogAuthorInfo author={author} />
 				<Space wrap>
 					{populatedTags.map(tag => {

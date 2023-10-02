@@ -11,7 +11,8 @@ import BlogForm from '../../components/Blog/BlogForm';
 import Title from 'antd/es/typography/Title';
 import { Form, Layout, Spin } from 'antd';
 import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
-import { extractIds } from '../../utils/helperFuncs';
+import { extractIds } from '../../helpers';
+import useImageUpload from '../../hooks/useImageUpload';
 
 function CreateBlogPage() {
 	const navigate = useNavigate();
@@ -23,7 +24,8 @@ function CreateBlogPage() {
 	const categoryStatus = useSelector(state => state.categories.status);
 
 	const [form] = Form.useForm();
-	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
+	const [uploadedImage, uploadedImageSetters] = useImageUpload();
+	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
 	const initialFormValues = {
 		title: '',
@@ -44,7 +46,6 @@ function CreateBlogPage() {
 
 	const handleSuccess = (data, publishAction, blog) => {
 		const navigateTo = `/blog/${data.id}${publishAction === 'save' ? '/update' : ''}`
-		setIsSubmitBtnLoading(false);
 		dispatch(blogAdded(data));
 		navigate(navigateTo);
 		const msgAction = publishAction === 'save' ? 'saved as draft' : 'published';
@@ -56,35 +57,36 @@ function CreateBlogPage() {
 	}
 
 	const handleError = (data) => {
-		setIsSubmitBtnLoading(false);
 		form.setFields([{ name: 'title', errors: [data.error] }]);
 	}
 
-	const handleBlogCreate = (publishAction) => {
-		setIsSubmitBtnLoading(true);
-		const blog = form.getFieldsValue();
-		createBlogRequest({
-			blog: {
-				title: blog.title,
-				content: blog.content,
-				isPrivate: blog.isPrivate,
-				tags: extractIds({ docs: tags, values: blog.tags, key: 'name' }),
-				category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || null
-			},
-			token: authorToken,
-			publishAction
-		})
-			.then(data => {
-				if (data && data.error) {
-					handleError(data);
-				} else if (data && !data.error && !data.errors) {
-					handleSuccess(data, publishAction, blog);
-				}
-			})
-			.catch(error => {
-				setIsSubmitBtnLoading(false);
-				notifyError(error)
+	const handleBlogCreate = async (publishAction) => {
+		setIsDataSubmitting(true);
+		try {
+			const blog = form.getFieldsValue();
+			const data = await createBlogRequest({
+				blog: {
+					title: blog.title,
+					content: blog.content,
+					isPrivate: blog.isPrivate,
+					tags: extractIds({ docs: tags, values: blog.tags, key: 'name' }),
+					category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || null
+				},
+				token: authorToken,
+				publishAction,
+				...(uploadedImage.file ? { file: uploadedImage.file } : {})
 			});
+
+			if (data && data.error) {
+				handleError(data);
+			} else if (data && !data.error && !data.errors) {
+				handleSuccess(data, publishAction, blog);
+			}
+		} catch (error) {
+			notifyError(error);
+		} finally {
+			setIsDataSubmitting(false);
+		}
 	}
 
 	const handleBlogSubmit = () => () => handleBlogCreate('publish');
@@ -102,8 +104,10 @@ function CreateBlogPage() {
 			blogTags={tags}
 			handleBlogSubmit={handleBlogSubmit}
 			handleSaveDraft={handleSaveDraft}
-			isSubmitBtnLoading={isSubmitBtnLoading}
+			isDataSubmitting={isDataSubmitting}
 			form={form}
+			uploadedImage={uploadedImage}
+			uploadedImageSetters={uploadedImageSetters}
 		/>
 	</Layout>
 }
