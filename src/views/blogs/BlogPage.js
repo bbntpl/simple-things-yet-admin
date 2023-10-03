@@ -11,8 +11,6 @@ import { selectLoggedAuthor } from '../../redux/sliceReducers/loggedAuthorSlice'
 import { fetchBlogByIdRequest } from '../../services/blogAPI'
 import BlogArticle from '../../components/Blog/BlogArticle';
 import BlogCommentList from '../../components/Blog/BlogCommentList';
-import BlogHeader from '../../components/Blog/BlogHeader';
-import { getImageUrl } from '../../services/helper';
 
 const modules = {
 	toolbar: [
@@ -35,15 +33,19 @@ function BlogPage() {
 		content: '',
 	});
 	const [blog, setBlog] = useState(null);
+	const [doesBlogExists, setDoesBlogExists] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
+		if (!id) return;
 		async function initializeBlog() {
 			try {
 				const fetchedBlog = await fetchBlogByIdRequest(id);
 				setBlog(fetchedBlog)
+				setDoesBlogExists(true)
 			} catch (error) {
-				notifyError(error)
+				notifyError(error);
+				setDoesBlogExists(false)
 			}
 		}
 		initializeBlog();
@@ -85,13 +87,15 @@ function BlogPage() {
 		}, 500);
 	}
 
+	if (doesBlogExists === null) return <Spin />
+
 	return <>
 		{
-			(blog && !blog.isPublished) && (
-				<Navigate to={`/blog/${blog.id}/update`} replace={true} />
+			(!doesBlogExists) && (
+				<Navigate to={'/NotFound'} replace={true} />
 			)
 		}
-		{blog
+		{blog && doesBlogExists
 			? <>
 				<BlogArticle blog={blog} />
 				<Divider orientation='left'>New Comment</Divider>

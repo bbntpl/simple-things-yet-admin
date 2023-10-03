@@ -35,11 +35,19 @@ export const createBlogRequest = async (args) => {
 
 		for (const key in blog) {
 			if (blog.hasOwnProperty(key)) {
-				formData.append(key, blog[key]);
+				if (Array.isArray(blog[key])) {
+					blog[key].forEach(item => {
+						formData.append(`${key}[]`, item);
+					});
+				} else {
+					formData.append(key, blog[key]);
+				}
 			}
 		}
 
-		formData.append('blogImage', file);
+		if (file) {
+			formData.append('blogImage', file);
+		}
 
 		const response = await axiosInstance.post(
 			`${baseDirectory}/${publishAction}`,

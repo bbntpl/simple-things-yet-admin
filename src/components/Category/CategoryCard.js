@@ -10,10 +10,6 @@ const CategoryCard = ({ category }) => {
 		navigate(`../category/${category.slug}`);
 	};
 
-	const onLoad = () => {
-		console.log('loaded');
-	}
-
 	const onError = () => {
 		console.log('error');
 	}
@@ -30,7 +26,6 @@ const CategoryCard = ({ category }) => {
 						alt={category.name}
 						src={imgSrc}
 						loading='lazy'
-						onLoad={onLoad}
 						onError={onError}
 					/>
 				</div>

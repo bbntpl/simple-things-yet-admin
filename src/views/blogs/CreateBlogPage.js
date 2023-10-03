@@ -3,14 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
+import { categoryBlogsUpdated, fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
 import { blogAdded } from '../../redux/sliceReducers/blogsSlice';
 import { createBlogRequest } from '../../services/blogAPI';
 import openNotification, { notifyError } from '../../lib/openNotification';
 import BlogForm from '../../components/Blog/BlogForm';
 import Title from 'antd/es/typography/Title';
 import { Form, Layout, Spin } from 'antd';
-import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
+import { fetchTags, selectTags, tagBlogsUpdated } from '../../redux/sliceReducers/tagsSlice';
 import { extractIds } from '../../helpers';
 import useImageUpload from '../../hooks/useImageUpload';
 
@@ -44,15 +44,31 @@ function CreateBlogPage() {
 		}
 	}, [categoryStatus, dispatch, tagStatus]);
 
-	const handleSuccess = (data, publishAction, blog) => {
-		const navigateTo = `/blog/${data.id}${publishAction === 'save' ? '/update' : ''}`
-		dispatch(blogAdded(data));
+	const handleSuccess = (updatedBlog, publishAction) => {
+		const navigateTo = `/blog/${updatedBlog.id}${publishAction === 'save' ? '/update' : ''}`
+		dispatch(blogAdded(updatedBlog));
+
+		// Update categories if they exist
+		if (updatedBlog.category) {
+			dispatch(categoryBlogsUpdated({
+				categoryId: updatedBlog.category,
+				blogId: updatedBlog.id
+			}))
+		}
+
+		// Update tags if they exist
+		if (updatedBlog.tags) {
+			dispatch(tagBlogsUpdated({
+				tagIds: updatedBlog.tags,
+				blogId: updatedBlog.id
+			}))
+		}
 		navigate(navigateTo);
 		const msgAction = publishAction === 'save' ? 'saved as draft' : 'published';
 		openNotification({
 			type: 'success',
 			message: 'Successful operation',
-			description: `New blog "${blog.title}" is successfully ${msgAction}`,
+			description: `New blog "${updatedBlog.title}" is successfully ${msgAction}`,
 		});
 	}
 
@@ -70,7 +86,8 @@ function CreateBlogPage() {
 					content: blog.content,
 					isPrivate: blog.isPrivate,
 					tags: extractIds({ docs: tags, values: blog.tags, key: 'name' }),
-					category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || null
+					// If there are no ids, pass 'NONE' instead
+					category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || 'NONE'
 				},
 				token: authorToken,
 				publishAction,
@@ -80,7 +97,7 @@ function CreateBlogPage() {
 			if (data && data.error) {
 				handleError(data);
 			} else if (data && !data.error && !data.errors) {
-				handleSuccess(data, publishAction, blog);
+				handleSuccess(data, publishAction);
 			}
 		} catch (error) {
 			notifyError(error);

@@ -28,6 +28,23 @@ const categoriesSlice = createSlice({
 			if (index > -1) {
 				state.categories[index] = action.payload;
 			}
+		},
+		categoryBlogsUpdated(state, action) {
+			const { categoryId, blogId } = action.payload;
+			const category = state.categories.find(cat => cat.id === categoryId);
+
+			if (category) {
+				// If it exists, it means the blog got deleted; otherwise, it got added
+				const isBlogExisted = category.blogs.some(blog => blog === blogId);
+
+				// If the blogs exists under category, then blog ref has to be removed
+				if (isBlogExisted) {
+					category.blogs = category.blogs.filter(blog => blog !== blogId);
+				} else {
+					// Otherwise, add the new blog to the category
+					category.blogs.push(blogId);
+				}
+			}
 		}
 	},
 	extraReducers: (builder) => {
@@ -52,7 +69,8 @@ export const selectCategories = (state) => state.categories.categories;
 export const {
 	categoryAdded,
 	categoryDeleted,
-	categoryUpdated
+	categoryUpdated,
+	categoryBlogsUpdated
 } = categoriesSlice.actions;
 
 export default categoriesSlice.reducer;

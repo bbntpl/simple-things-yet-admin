@@ -27,7 +27,7 @@ export default function CategoryForm(props) {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
-	const areThereBlogs = category?.blogs.length || 0;
+	const areThereBlogs = category?.blogs?.length || 0;
 
 	useEffect(() => {
 		if (isEditing && category) {
@@ -115,11 +115,11 @@ export default function CategoryForm(props) {
 							onConfirm={handleCategoryDeletion(category?.id)}
 							okText='Yes'
 							cancelText='No'
-							disabled={!!areThereBlogs}
+							disabled={areThereBlogs}
 						>
 							<Button
 								danger
-								disabled={!!areThereBlogs}
+								disabled={areThereBlogs}
 							>
 								Delete the category
 							</Button>
@@ -127,7 +127,7 @@ export default function CategoryForm(props) {
 						{areThereBlogs ? <strong>
 							You must delete all of {category?.name}-related blogs before category deletion.
 						</strong> : null}
-						{category.blogs.length > 0
+						{areThereBlogs > 0
 							? <p style={{ color: 'gray' }}>Total blogs(drafts/published): {category.blogs.length}</p> : null}
 					</Space>
 				}

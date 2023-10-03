@@ -7,6 +7,7 @@ import TagItem from './TagItem';
 import { createTagRequest } from '../../services/tagAPI';
 import { tagAdded } from '../../redux/sliceReducers/tagsSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
+import { notifyError } from '../../lib/openNotification';
 
 export default function TagItemList({ tags }) {
 	const dispatch = useDispatch();
@@ -23,7 +24,7 @@ export default function TagItemList({ tags }) {
 				inputRef.current.focus();
 			})
 			.catch(err => {
-				console.log(err);
+				notifyError('Something wrong happened after submiting new tag: ', err)
 			})
 	}
 

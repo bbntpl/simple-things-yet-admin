@@ -96,6 +96,12 @@ function App() {
 							</AuthGateway>
 						} >
 						</Route>
+						<Route path='/draft/:id' element={
+							<AuthGateway>
+								<BlogPage />
+							</AuthGateway>
+						} >
+						</Route>
 						<Route path='/tag/:tagSlug' element={
 							<AuthGateway>
 								<BlogsPageByTag />

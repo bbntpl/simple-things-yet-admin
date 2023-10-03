@@ -10,8 +10,8 @@ import openNotification, { notifyError } from '../../lib/openNotification';
 
 import { blogDeleted, blogUpdated, initializeBlogs } from '../../redux/sliceReducers/blogsSlice';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
-import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
+import { categoryBlogsUpdated, fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
+import { fetchTags, selectTags, tagBlogsUpdated } from '../../redux/sliceReducers/tagsSlice';
 import { deleteBlogRequest, fetchBlogByIdRequest, updateBlogImageRequest, updateBlogRequest } from '../../services/blogAPI';
 import { extractIds } from '../../helpers';
 import useImageUpload from '../../hooks/useImageUpload';
@@ -32,7 +32,7 @@ function UpdateBlogPage() {
 	const [uploadedImage, uploadedImageSetters] = useImageUpload();
 	const [form] = Form.useForm()
 
-	const [isSubmitBtnLoading, setIsSubmitBtnLoading] = useState(false);
+	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
 	useEffect(() => {
 		if (categoryStatus === 'idle') {
@@ -66,7 +66,7 @@ function UpdateBlogPage() {
 	const updateBlog = async (args) => {
 		const { updatedBlog, publishAction } = args;
 		try {
-			setIsSubmitBtnLoading(true);
+			setIsDataSubmitting(true);
 			const data = await updateBlogRequest({
 				blogId: blog.id,
 				updatedBlog,
@@ -84,9 +84,7 @@ function UpdateBlogPage() {
 
 			if (data?.error) throw new Error(data.error);
 
-			setIsSubmitBtnLoading(false);
 			dispatch(blogUpdated(data));
-
 			if (publishAction === 'publish') {
 				navigate(`/blog/${data.id}`);
 			}
@@ -98,50 +96,66 @@ function UpdateBlogPage() {
 				description: `Blog "${blog.title}" is successfully ${msgAction}`,
 			});
 		} catch (error) {
-			setIsSubmitBtnLoading(false);
 			notifyError(error);
+		} finally {
+			setIsDataSubmitting(false);
 		}
 	}
 
 	const handleBlogUpdate = (publishAction) => {
-		setIsSubmitBtnLoading(true);
-		setTimeout(() => {
-			const currentFormValues = form.getFieldsValue();
-			const updatedBlog = {
-				...blog,
-				...currentFormValues,
-				category: extractIds({
-					docs: blogCategories,
-					values: [currentFormValues.category],
-					key: 'name'
-				})[0] || null,
-				tags: extractIds({
-					docs: blogTags,
-					values: currentFormValues.tags,
-					key: 'name'
-				})
-			}
+		const currentFormValues = form.getFieldsValue();
+		const updatedBlog = {
+			...blog,
+			...currentFormValues,
+			category: extractIds({
+				docs: blogCategories,
+				values: [currentFormValues.category],
+				key: 'name'
+			})[0] || null,
+			tags: extractIds({
+				docs: blogTags,
+				values: currentFormValues.tags,
+				key: 'name'
+			})
+		}
 
-			updateBlog({ updatedBlog, publishAction });
-		}, 500);
+		updateBlog({ updatedBlog, publishAction });
 	}
 
 	const handleSaveDraft = () => () => handleBlogUpdate('save');
 	const handleBlogSubmit = () => () => handleBlogUpdate('publish');
 
-	const handleBlogDeletion = () => {
-		deleteBlogRequest(blog.id, authorToken)
-			.then(() => {
-				dispatch(blogDeleted(blog.id));
-				const navigateTo = blog?.isPublished ? '/blogs' : '/drafts';
-				navigate(navigateTo);
-				openNotification({
-					type: 'success',
-					message: 'Operation successful',
-					description: `The blog with id ${blog.id} is successfully deleted`
-				})
+	const handleBlogDeletion = async () => {
+		try {
+			await deleteBlogRequest(blog.id, authorToken)
+			dispatch(blogDeleted(blog.id));
+
+			// Update categories if they exist
+			if (blog.category) {
+				dispatch(categoryBlogsUpdated({
+					categoryId: blog.category,
+					blogId: blog.id
+				}))
+			}
+
+			// Update tags if they exist
+			if (blog.tags) {
+				dispatch(tagBlogsUpdated({
+					tagIds: blog.tags,
+					blogId: blog.id
+				}))
+			}
+
+			const navigateTo = blog?.isPublished ? '/blogs' : '/drafts';
+			navigate(navigateTo);
+			openNotification({
+				type: 'success',
+				message: 'Operation successful',
+				description: `The blog with id ${blog.id} is successfully deleted`
 			})
-			.catch(error => notifyError(error))
+		} catch (error) {
+			notifyError(error);
+		}
 	}
 
 	if (blog === null || categoryStatus !== 'succeeded' ||
@@ -167,7 +181,7 @@ function UpdateBlogPage() {
 			handleSaveDraft={handleSaveDraft}
 			handleBlogSubmit={handleBlogSubmit}
 			handleBlogDeletion={handleBlogDeletion}
-			isSubmitBtnLoading={isSubmitBtnLoading}
+			isDataSubmitting={isDataSubmitting}
 			uploadedImage={uploadedImage}
 			uploadedImageSetters={uploadedImageSetters}
 			form={form}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Typography, Card, Tag, Row, Col, Space, Spin, Button, Divider } from 'antd';
+import { Typography, Card, Row, Col, Space, Spin, Button, Divider } from 'antd';
 import moment from 'moment';
 import DOMPurify from 'dompurify';
 
@@ -11,6 +11,8 @@ import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
 import { notifyError } from '../../lib/openNotification';
 import BlogHeader from './BlogHeader';
 import { getImageUrl } from '../../services/helper';
+import BlogTags from './BlogTags';
+import BlogStatusIndicator from './BlogStatusIndicator';
 
 const { Text } = Typography;
 
@@ -25,6 +27,7 @@ export default function BlogArticle({ blog }) {
 		likes,
 		createdAt,
 		updatedAt,
+		isPublished,
 		imageId
 	} = blog
 	const navigate = useNavigate();
@@ -69,32 +72,21 @@ export default function BlogArticle({ blog }) {
 	const navigateToBlogEditPage = () => {
 		navigate('./update');
 	}
-	const areAllLoaded = Object.values(loadingStatus).every(status => status === true)
+	const areAllLoaded = Object.values(loadingStatus)
+		.every(status => status === true)
 
 	if (!areAllLoaded || !blog) return <Spin />
 
 	return (
 		<div style={{ margin: '1.5rem 2rem' }}>
 			<Card style={{ backgroundColor: 'transparent' }}>
-				<Divider>
-					<Text strong>{isPrivate
-						? 'This blog is not available to the public'
-						: 'This blog is available to the public'}
-					</Text>
-				</Divider>
+				<BlogStatusIndicator isPrivate={isPrivate} isPublished={isPublished} />
 				<Button onClick={navigateToBlogEditPage}>
 					Edit Blog
 				</Button>
 				<BlogHeader title={title} previewImage={previewImageUrl} />
 				<BlogAuthorInfo author={author} />
-				<Space wrap>
-					{populatedTags.map(tag => {
-						console.log(tag); // error in tag.name - tag is returning null
-						return (
-							<Tag color='blue' key={tag.id}>{tag.name}</Tag>
-						);
-					})}
-				</Space>
+				<BlogTags tags={populatedTags} />
 				<Row>
 					<Col span={12} style={{ textAlign: 'left' }}>
 						<Space>
@@ -104,7 +96,7 @@ export default function BlogArticle({ blog }) {
 					</Col>
 					<Col span={12} style={{ textAlign: 'right' }}>
 						{blogUpdateDate.isSame(blogCreationDate, 'day')
-							? <Text type="secondary">Published: {blogCreationDate.format('LL')}</Text>
+							? <Text type="secondary">{isPublished ? 'Published: ' : 'Created: '} {blogCreationDate.format('LL')}</Text>
 							: <Text type="secondary">Last Update: {blogUpdateDate.format('LL')}</Text>}
 						{blogCategory ? <Text type='secondary'> / {blogCategory.name}</Text> : null}
 					</Col>

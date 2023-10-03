@@ -18,9 +18,11 @@ export default function BlogAuthorInfo({ author }) {
 	}, [author])
 
 	return (
-		<div style={blogAuthorInfoStyles}>
-			<Typography.Text strong>Written by:  {author.name}</Typography.Text>
-			<Avatar src={authorImageUrl} />
+		<div>
+			<div style={blogAuthorInfoStyles}>
+				<Typography.Text strong>Written by:  {author.name}</Typography.Text>
+				<Avatar src={authorImageUrl} />
+			</div>
 		</div>
 	);
 }

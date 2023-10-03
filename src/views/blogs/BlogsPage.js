@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Spin, Collapse, Layout } from 'antd';
+import { Spin, Layout } from 'antd';
 
 import { initializeBlogs, selectPublishedBlogs } from '../../redux/sliceReducers/blogsSlice';
 import { fetchTags, selectTags } from '../../redux/sliceReducers/tagsSlice';
 import BlogList from '../../components/Blog/BlogList';
-import TagItemList from '../../components/Tag/TagItemList';
+import TagsCollapse from '../../components/Tag/TagsCollapse';
 
 function BlogsPage() {
 	const dispatch = useDispatch()
@@ -28,11 +28,7 @@ function BlogsPage() {
 	}
 
 	return <Layout>
-		<Collapse size='large'>
-			<Collapse.Panel header={'Tags'}>
-				<TagItemList tags={tags} />
-			</Collapse.Panel>
-		</Collapse>
+		<TagsCollapse collapseSize='large' headerName='Tags' tags={tags} />
 		<BlogList headerText='Your Blogs' blogs={publishedBlogs} />
 	</Layout>
 }

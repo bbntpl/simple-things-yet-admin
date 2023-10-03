@@ -64,13 +64,21 @@ export default function BlogForm({
 		return tagNames;
 	}
 
+	const navigateToPreviewPage = (isPublished) => {
+		if (isPublished) {
+			navigate(`/blog/${id}`)
+		} else {
+			navigate(`/draft/${id}`)
+		}
+	}
+
 	useEffect(() => {
 		if (isEditing) {
 			if (initialFormValues && initialFormValues.imageId) {
 				const imageId = form.getFieldsValue() && form.getFieldsValue().imageId
 					? form.getFieldsValue().imageId
 					: initialFormValues.imageId;
-				console.log(imageId);
+
 				const initializeExistingImageAndFile = async () => {
 					const imageUrl = getImageUrl(`/blogs/${imageId}/image`);
 					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl);
@@ -79,7 +87,7 @@ export default function BlogForm({
 				initializeExistingImageAndFile();
 			}
 		}
-	}, [isEditing, form, initialFormValues, uploadedImageSetters])
+	}, [isEditing, form])
 
 	return (
 		<>
@@ -159,16 +167,17 @@ export default function BlogForm({
 						<Form.Item>
 							<Space>
 								{
-									initialFormValues.isPublished ?
-										<Button
-											htmlType='dashed'
-											onClick={() => navigate(`/blog/${id}`)}
-										>
-											Preview
-										</Button> : null
+									isEditing &&
+									<Button
+										type='dashed'
+
+										loading={isDataSubmitting}
+										onClick={() => navigateToPreviewPage(initialFormValues.isPublished)}
+									>
+										Preview
+									</Button>
 								}
 								<Button
-									htmlType='button'
 									onClick={handleSaveDraft()}
 									loading={isDataSubmitting}
 								>
@@ -199,7 +208,7 @@ export default function BlogForm({
 										onConfirm={handleBlogDeletion}
 										okText='Yes'
 									>
-										<Button danger>Delete</Button>
+										<Button danger loading={isDataSubmitting}>Delete</Button>
 									</Popconfirm>
 								}
 							</Space>

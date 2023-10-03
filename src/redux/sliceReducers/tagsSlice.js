@@ -28,6 +28,26 @@ const tagsSlice = createSlice({
 			if (index > -1) {
 				state.tags[index] = action.payload;
 			}
+		},
+		tagBlogsUpdated(state, action) {
+			const { tagIds, blogId } = action.payload;
+
+			tagIds.forEach(tagId => {
+				const tag = state.tags.find(t => t.id === tagId);
+
+				if (tag) {
+					// If it exists, it means the blog got deleted; otherwise, it got added
+					const isBlogExisted = tag.blogs.some(blog => blog === blogId);
+
+					// If the blog exists in the tag, remove it
+					if (isBlogExisted) {
+						tag.blogs = tag.blogs.filter(blog => blog !== blogId);
+					} else {
+						// Otherwise, add the new blog to the tag
+						tag.blogs.push(blogId);
+					}
+				}
+			});
 		}
 	},
 	extraReducers: (builder) => {
@@ -52,7 +72,8 @@ export const selectTags = (state) => state.tags.tags;
 export const {
 	tagAdded,
 	tagDeleted,
-	tagUpdated
+	tagUpdated,
+	tagBlogsUpdated
 } = tagsSlice.actions;
 
 export default tagsSlice.reducer;
