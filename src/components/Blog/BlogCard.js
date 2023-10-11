@@ -13,7 +13,8 @@ export default function BlogCard({ blog }) {
 		likes,
 		createdAt,
 		publishedAt,
-		isPublished
+		isPublished,
+		isPrivate
 	} = blog;
 
 	const navigate = useNavigate();
@@ -63,6 +64,9 @@ export default function BlogCard({ blog }) {
 						</div>
 					</Space>
 				</Col>
+			</Row>
+			<Row>
+				{isPrivate ? 'Private' : 'Public'}
 			</Row>
 		</Card >
 	);

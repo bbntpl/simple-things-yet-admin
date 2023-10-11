@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Typography, Card, Row, Col, Space, Spin, Button, Divider } from 'antd';
+import { Typography, Card, Row, Col, Space, Spin, Button } from 'antd';
 import moment from 'moment';
 import DOMPurify from 'dompurify';
 
