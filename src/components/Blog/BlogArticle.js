@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { Typography, Card, Row, Col, Space, Spin, Button } from 'antd';
 import moment from 'moment';
 import DOMPurify from 'dompurify';
-
-import BlogAuthorInfo from '../Blog/BlogAuthorInfo';
 import { HeartFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+
+import BlogAuthorInfo from '../Blog/BlogAuthorInfo';
 import { fetchTagByIdRequest } from '../../services/tagAPI';
 import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
 import { notifyError } from '../../lib/openNotification';
@@ -101,7 +101,10 @@ export default function BlogArticle({ blog }) {
 						{blogCategory ? <Text type='secondary'> / {blogCategory.name}</Text> : null}
 					</Col>
 				</Row>
-				<div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+				<div
+					className="blog-content"
+					dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+				/>
 			</Card>
 		</div>
 	);

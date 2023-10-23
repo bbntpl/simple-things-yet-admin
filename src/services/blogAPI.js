@@ -100,3 +100,7 @@ export const deleteBlogRequest = async (id, token) => {
 		throw new Error(`${error} (during blog deletion)`);
 	}
 }
+
+export const getBlogImageUrl = (imageId) => {
+	return `${process.env.REACT_APP_API_URL}${baseDirectory}/${imageId}/image`;
+};

@@ -8,7 +8,7 @@ import AuthorComments from '../components/AuthorComments';
 import ImageUpload from '../components/ImageUpload';
 
 import {
-	getUserInfo,
+	getUser,
 	updateAuthor,
 	updateAuthorImage,
 } from '../services/userAPI';
@@ -39,7 +39,7 @@ function ProfilePage() {
 		if (savedAuthorInfo) {
 			form.setFieldsValue(savedAuthorInfo);
 		} else {
-			getUserInfo().then((result) => {
+			getUser().then((result) => {
 				setAuthor(result);
 				dispatch(updateAuthorInfo({ info: result }))
 				form.setFieldsValue(result);

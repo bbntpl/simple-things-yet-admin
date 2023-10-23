@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify';
 import { useNavigate } from 'react-router-dom';
 import { HeartOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import { getBlogImageUrl } from '../../services/blogAPI';
 
 export default function BlogCard({ blog }) {
 	const {
@@ -39,6 +40,17 @@ export default function BlogCard({ blog }) {
 			}}
 			onClick={navigateToBlog}
 		>
+			{blog.imageId ?
+				<div style={{ minHeight: '150px' }}>
+					<img
+						src={getBlogImageUrl(blog.imageId)}
+						alt={title}
+						style={{
+							width: '100%',
+							verticalAlign: 'middle'
+						}} />
+				</div> : null
+			}
 			<Paragraph
 				style={{
 					margin: '0 0 2rem 0'

@@ -30,10 +30,10 @@ export default function BlogsPageByTag() {
 		}
 	}, [blogStatus, dispatch, tagStatus])
 
-	const handleTagDeletion = async (tagName) => {
+	const handleTagDeletion = async () => {
 		if (tag.blogs.length) return;
 		deleteTagRequest(tag.id, authorToken)
-			.then(result => {
+			.then(() => {
 				dispatch(tagDeleted(tag.id));
 				navigate(-1);
 			})

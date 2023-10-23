@@ -20,6 +20,10 @@
 	height: auto;
 }
 
+.blog-content img {
+	width: 100%;
+}
+
 /* Responsive Layout CSS */
 .responsive-layout {
 	margin-left: auto;

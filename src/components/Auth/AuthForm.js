@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Row, Col, Layout, Form, Input, Button, Typography, Space } from 'antd';
 
-import { getUserInfo, loginUser, registerUser } from '../../services/userAPI';
+import { getUser, loginUser, registerUser } from '../../services/userAPI';
 import { loginAuthor, selectLoggedAuthor, updateAuthorInfo } from '../../redux/sliceReducers/loggedAuthorSlice';
 
 import openNotification from '../../lib/openNotification';
@@ -74,7 +74,7 @@ function AuthForm({ authFormType }) {
 	}
 
 	const saveAuthorInfo = async () => {
-		const result = await getUserInfo();
+		const result = await getUser();
 		dispatch(updateAuthorInfo({ info: result }));
 	}
 

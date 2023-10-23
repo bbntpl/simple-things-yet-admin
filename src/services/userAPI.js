@@ -54,7 +54,7 @@ export const updateAuthorImage = async (file, token) => {
 	}
 }
 
-export const getUserInfo = async () => {
+export const getUser = async () => {
 	try {
 		const response = await axiosInstance.get(baseDirectory);
 		return response.data;
