@@ -40,10 +40,10 @@ export default function BlogCard({ blog }) {
 			}}
 			onClick={navigateToBlog}
 		>
-			{blog.imageId ?
+			{blog.imageFile ?
 				<div style={{ minHeight: '150px' }}>
 					<img
-						src={getBlogImageUrl(blog.imageId)}
+						src={getBlogImageUrl(blog.imageFile)}
 						alt={title}
 						style={{
 							width: '100%',

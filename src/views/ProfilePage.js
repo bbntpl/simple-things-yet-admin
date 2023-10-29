@@ -34,8 +34,8 @@ function ProfilePage() {
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
 	useEffect(() => {
-		// If saved author info from redus is available then there is no need to do api request
-		// so initialize fields value using the data
+		// If saved author info from redus is available, then there is no need to do api request
+		// Therefore, initialize the fields value using the already saved data
 		if (savedAuthorInfo) {
 			form.setFieldsValue(savedAuthorInfo);
 		} else {
@@ -49,9 +49,9 @@ function ProfilePage() {
 
 	useEffect(() => {
 		const fetchImage = async () => {
-			if (author && author.imageId && !uploadedImage.file) {
+			if (author && author.imageFile && !uploadedImage.file) {
 				try {
-					const imageUrl = getImageUrl(`/author/${author.imageId}/image`);
+					const imageUrl = getImageUrl(author.imageFile);
 					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl)
 				} catch (err) {
 					notifyError({ message: err.message });

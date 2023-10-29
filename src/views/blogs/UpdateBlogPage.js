@@ -174,7 +174,7 @@ function UpdateBlogPage() {
 				category: blog.category,
 				tags: blog.tags,
 				isPrivate: blog.isPrivate,
-				imageId: blog.imageId
+				imageFile: blog.imageFile
 			}}
 			blogCategories={blogCategories}
 			blogTags={blogTags}

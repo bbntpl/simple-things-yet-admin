@@ -41,10 +41,10 @@ export const createCategoryRequest = async (category, token) => {
 		return response.data;
 	} catch (error) {
 		if (error.response) {
-			console.log(error.response.data);
+			console.error(error.response.data);
 			return error.response.data;
 		} else {
-			console.log(error);
+			console.error(error);
 			throw new Error(`${error} (during category creation)`);
 		}
 	}
@@ -74,10 +74,10 @@ export const updateCategoryRequest = async (categoryId, category, token) => {
 		return response.data;
 	} catch (error) {
 		if (error.response) {
-			console.log(error.response.data);
+			console.error(error.response.data);
 			return error.response.data;
 		} else {
-			console.log(error);
+			console.error(error);
 			throw new Error(`${error} (during category update)`);
 		}
 	}

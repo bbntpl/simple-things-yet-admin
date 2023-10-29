@@ -17,8 +17,8 @@ export async function fetchImageRequest(endpoint) {
 	};
 }
 
-export function getImageUrl(routeUrl) {
-	return `${process.env.REACT_APP_API_URL}${routeUrl}`;
+export function getImageUrl(imageId) {
+	return `${process.env.REACT_APP_API_URL}/images/${imageId}/source`;
 }
 
 export async function updateImageRequest(args) {

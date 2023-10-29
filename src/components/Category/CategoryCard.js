@@ -1,10 +1,10 @@
 import { Card } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../../services/helper';
 
 const CategoryCard = ({ category }) => {
 	const navigate = useNavigate();
-	const imgSrc = `${process.env.REACT_APP_API_URL}/categories/${category.imageId}/image`;
 
 	const onCardClick = () => {
 		navigate(`../category/${category.slug}`);
@@ -18,13 +18,13 @@ const CategoryCard = ({ category }) => {
 		<Card
 			hoverable
 			className='category-card'
-			cover={category?.imageId
+			cover={category?.imageFile
 				?
 				<div style={{ maxHeight: '140px', overflow: 'hidden' }}>
 					<img
 						style={{ width: '100%', height: 'auto' }}
 						alt={category.name}
-						src={imgSrc}
+						src={getImageUrl(category.imageFile)}
 						loading='lazy'
 						onError={onError}
 					/>

@@ -74,13 +74,13 @@ export default function BlogForm({
 
 	useEffect(() => {
 		if (isEditing) {
-			if (initialFormValues && initialFormValues.imageId) {
-				const imageId = form.getFieldsValue() && form.getFieldsValue().imageId
-					? form.getFieldsValue().imageId
-					: initialFormValues.imageId;
+			if (initialFormValues && initialFormValues.imageFile) {
+				const imageFile = form.getFieldsValue() && form.getFieldsValue().imageFile
+					? form.getFieldsValue().imageFile
+					: initialFormValues.imageFile;
 
 				const initializeExistingImageAndFile = async () => {
-					const imageUrl = getImageUrl(`/blogs/${imageId}/image`);
+					const imageUrl = getImageUrl(imageFile);
 					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl);
 				}
 
@@ -102,7 +102,7 @@ export default function BlogForm({
 							category: (blogCategories.find(cat => cat.id === initialFormValues.category) || {}).name || undefined,
 							tags: extractTagNames(initialFormValues.tags),
 							isPrivate: initialFormValues.isPrivate,
-							imageId: initialFormValues.imageId
+							imageFile: initialFormValues.imageFile
 						}}
 					>
 						<Form.Item label='Title' name='title'>

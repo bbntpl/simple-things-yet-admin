@@ -22,6 +22,7 @@ import ViewersPage from './views/viewers/ViewersPage';
 import ViewerPage from './views/viewers/ViewerPage';
 import CommentsPage from './views/comments/CommentsPage';
 import CommentPage from './views/comments/CommentPage';
+import GalleryPage from './views/GalleryPage';
 import Dashboard from './views/Dashboard';
 import AuthGateway from './lib/AuthGateway';
 
@@ -75,6 +76,12 @@ function App() {
 						<Route exact path='/categories' element={
 							<AuthGateway>
 								<CategoryCollection />
+							</AuthGateway>
+						} >
+						</Route>
+						<Route exact path='/gallery' element={
+							<AuthGateway>
+								<GalleryPage />
 							</AuthGateway>
 						} >
 						</Route>

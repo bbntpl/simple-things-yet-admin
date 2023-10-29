@@ -6,6 +6,7 @@ import commentsSlice from './sliceReducers/commentsSlice';
 import loggedAuthorSlice from './sliceReducers/loggedAuthorSlice';
 import viewersSlice from './sliceReducers/viewersSlice';
 import tagsSlice from './sliceReducers/tagsSlice';
+import imageDocsSlice from './sliceReducers/imageDocsSlice';
 
 const store = configureStore({
 	reducer: {
@@ -14,7 +15,8 @@ const store = configureStore({
 		comments: commentsSlice,
 		loggedAuthor: loggedAuthorSlice,
 		tags: tagsSlice,
-		viewers: viewersSlice
+		viewers: viewersSlice,
+		imageDocs: imageDocsSlice
 	}
 })
 

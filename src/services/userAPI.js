@@ -9,10 +9,11 @@ export const registerUser = async (data) => {
 		const response = await axiosInstance.post(`${baseDirectory}/register`, data);
 		return response.data;
 	} catch (error) {
-		console.log(`${error} (during author registration)`);
+		console.error(`${error} (during author registration)`);
 		if (error.response) {
 			return error.response.data;
 		}
+		throw new Error('The backend server is currently not running');
 	}
 }
 
@@ -21,10 +22,11 @@ export const loginUser = async (data) => {
 		const response = await axiosInstance.post(`${baseDirectory}/login`, data);
 		return response.data;
 	} catch (error) {
-		console.log(`${error} (during author login)`);
+		console.error(`${error} (during author login)`);
 		if (error.response) {
 			return error.response.data;
 		}
+		throw new Error('The backend server is currently not running');
 	}
 }
 

@@ -28,7 +28,7 @@ export default function BlogArticle({ blog }) {
 		createdAt,
 		updatedAt,
 		isPublished,
-		imageId
+		imageFile
 	} = blog
 	const navigate = useNavigate();
 	const [populatedTags, setPopulatedTags] = useState(null);
@@ -45,8 +45,8 @@ export default function BlogArticle({ blog }) {
 	const blogCreationDate = moment(createdAt);
 
 	useEffect(() => {
-		setPreviewImageUrl(getImageUrl(`/blogs/${imageId}/image`))
-	}, [imageId])
+		setPreviewImageUrl(getImageUrl(imageFile))
+	}, [imageFile])
 
 	useEffect(() => {
 		const promiseTags = tags.map(id => {

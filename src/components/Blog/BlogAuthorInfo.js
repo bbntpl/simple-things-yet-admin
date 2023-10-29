@@ -13,7 +13,7 @@ export default function BlogAuthorInfo({ author }) {
 	const [authorImageUrl, setAuthorImageUrl] = useState(null);
 
 	useEffect(() => {
-		const imageUrl = getImageUrl(`/author/${author.imageId}/image`);
+		const imageUrl = getImageUrl(author.imageFile);
 		setAuthorImageUrl(imageUrl);
 	}, [author])
 

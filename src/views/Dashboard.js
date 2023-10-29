@@ -38,6 +38,7 @@ export default function Dashboard() {
 				<NavButton text='Published blogs' navigateTo='/blogs' />
 				<NavButton text='Collection of comments' navigateTo='/comments' />
 				<NavButton text='Navigate to viewers page' navigateTo='/viewers' />
+				<NavButton text='Image Gallery' navigateTo='/gallery' />
 			</Space>
 		</Layout>
 	</>

@@ -31,9 +31,9 @@ export default function CategoryForm(props) {
 
 	useEffect(() => {
 		if (isEditing && category) {
-			if (category.imageId) {
+			if (category.imageFile) {
 				const initializeExistingImageAndFile = async () => {
-					const imageUrl = getImageUrl(`/categories/${category.imageId}/image`);
+					const imageUrl = getImageUrl(category.imageFile);
 					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl);
 				}
 

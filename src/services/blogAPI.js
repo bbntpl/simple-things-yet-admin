@@ -96,7 +96,7 @@ export const deleteBlogRequest = async (id, token) => {
 
 		return response.data;
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		throw new Error(`${error} (during blog deletion)`);
 	}
 }
