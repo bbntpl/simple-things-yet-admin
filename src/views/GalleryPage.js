@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
+import { Divider, Spin } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
+
 import ImageUploader from '../components/Gallery/ImageUploader';
 import ImageGrids from '../components/Gallery/ImageGrids';
 import { fetchImageDocs, selectImageDocs } from '../redux/sliceReducers/imageDocsSlice';
-import { Spin } from 'antd';
+import CarouselComponent from '../components/Gallery/CarouselComponent';
 
 function GalleryPage() {
 	const dispatch = useDispatch();
@@ -24,6 +26,8 @@ function GalleryPage() {
 	return (
 		<div>
 			<ImageUploader />
+			<Divider />
+			<CarouselComponent />
 			{imageDocs && imageDocs.length > 0
 				? <ImageGrids imageDocs={imageDocs} />
 				: 'You haven\'t uploaded any images'

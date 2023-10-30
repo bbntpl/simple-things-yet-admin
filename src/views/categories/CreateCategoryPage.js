@@ -28,7 +28,6 @@ function CreateCategoryPage() {
 			if (uploadedImage.file) {
 				formData.append('categoryImage', uploadedImage.file);
 			}
-
 			const data = await createCategoryRequest(formData, authorToken);
 
 			if (data && data.errors) {

@@ -1,12 +1,89 @@
+.image-to-db {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-to-db__upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .image-grid-container {
+  column-count: 3;
+  column-gap: 10px;
+}
+
+.image-grid-container>div {
+  margin: 0 0 10px 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 16px;
+}
+
+.image-grid-container>div>.grid-image {
+  cursor: pointer;
+  grid-row: 1 / -1;
+  grid-column: 1;
 }
 
 .grid-image {
   width: 100%;
   height: auto;
   object-fit: cover;
+  transition: transform 0.3s ease-in-out;
+}
+
+.image-details>dt {
+  font-weight: bold;
+}
+
+.carousel-item {
+  margin: 0;
+  height: 150px;
+  max-height: 300px;
+  color: #fff;
+  line-height: 160px;
+  text-align: center;
+  background: #364d79;
+}
+
+.ant-carousel .slick-prev,
+.ant-carousel .slick-next,
+.ant-carousel .slick-prev:hover,
+.ant-carousel .slick-next:hover {
+  font-size: inherit;
+  color: currentColor;
+}
+
+.ant-carousel .slick-prev,
+.ant-carousel .slick-prev:hover {
+  left: 10px;
+  z-index: 2;
+  color: white;
+}
+
+.ant-carousel .slick-next,
+.ant-carousel .slick-next:hover {
+  right: 10px;
+  z-index: 2;
+  color: white;
+}
+
+@media (min-width: 768px) {
+  .image-to-db {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    margin-bottom: 1.8rem;
+  }
+
+  .image-to-db>div {
+    width: 50%;
+  }
+
+  .image-grid-container {
+    column-count: 4;
+    column-gap: 12px;
+  }
 }

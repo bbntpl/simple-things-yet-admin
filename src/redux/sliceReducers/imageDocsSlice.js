@@ -27,7 +27,7 @@ const imageDocsSlice = createSlice({
 		imageDocUpdated(state, action) {
 			const index = state.data.findIndex(imageDoc => imageDoc.id === action.payload.id);
 			if (index > -1) {
-				state.imageDocs[index] = action.payload;
+				state.data[index] = action.payload;
 			}
 		},
 	},

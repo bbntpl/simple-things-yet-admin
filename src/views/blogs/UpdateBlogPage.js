@@ -67,7 +67,6 @@ function UpdateBlogPage() {
 		const { updatedBlog, publishAction } = args;
 		try {
 			setIsDataSubmitting(true);
-			console.log(updatedBlog);
 			const data = await updateBlogRequest({
 				blogId: blog.id,
 				updatedBlog,

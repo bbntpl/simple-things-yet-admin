@@ -37,11 +37,12 @@ export const createImageFileDocRequest = async (creditData, token) => {
 }
 
 
-export const updateImageFileDocRequest = async (creditData, token) => {
+export const updateImageFileDocRequest = async (data, token) => {
+	const { body, imageId } = data;
 	try {
 		const response = await axiosInstance.put(
-			`${baseDirectory}/update`,
-			{ credit: creditData },
+			`${baseDirectory}/${imageId}/update`,
+			body,
 			requestOptions(token)
 		);
 
