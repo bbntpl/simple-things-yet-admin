@@ -32,10 +32,10 @@ function CreateCategoryPage() {
 
 			if (data && data.errors) {
 				form.setFields(
-					data.errors.map(error => ({ name: error.param, errors: [error.msg] }))
+					data.errors.map(error => ({ name: error.path, errors: [error.msg] }))
 				);
 			} else if (data && data.error) {
-				form.setFields([{ name: 'name', errors: [data.error] }]);
+				form.setFields([{ name: '', errors: [data.error] }]);
 			} else if (data && !data.error && !data.errors) {
 				dispatch(categoryAdded(data));
 				navigate('/dashboard');

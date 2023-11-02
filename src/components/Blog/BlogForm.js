@@ -15,6 +15,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ImageUpload from '../ImageUpload';
 import { useEffect } from 'react';
 import { getImageUrl } from '../../services/helper';
+import ImageCreditFieldset from '../ImageUpload/ImageCreditFieldset';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -142,11 +143,14 @@ export default function BlogForm({
 							label='Upload blog preview image'
 							style={{ width: 'max-content' }}
 						>
-							<ImageUpload
-								uploadedImage={uploadedImage}
-								updateUploadedImage={uploadedImageSetters.update}
-								uploadElName='categoryImage'
-							/>
+							<Space direction='vertical'>
+								<ImageUpload
+									uploadedImage={uploadedImage}
+									updateUploadedImage={uploadedImageSetters.update}
+									uploadElName='categoryImage'
+								/>
+								<ImageCreditFieldset />
+							</Space>
 						</Form.Item>
 						<Form.Item
 							valuePropName='checked'
@@ -165,7 +169,7 @@ export default function BlogForm({
 							/>
 						</Form.Item>
 						<Form.Item>
-							<Space>
+							<Space style={{ display: 'flex', flexWrap: 'wrap' }}>
 								{
 									isEditing &&
 									<Button

@@ -1,30 +1,27 @@
-import { Carousel, Form, Modal } from 'antd';
-import { useEffect, useState } from 'react';
+import { Button, Carousel, Form, Modal, Popconfirm, Space } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 import { getImageUrl } from '../../services/helper';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import ImageCreditFieldset from '../ImageUpload/ImageCreditFieldset';
+import ImageCreditForm from '../Gallery/ImageCreditForm';
 import openNotification, { notifyError } from '../../lib/openNotification';
-import { updateImageFileDocRequest } from '../../services/imageDocAPI';
+import { deleteImageFileDocRequest, updateImageFileDocRequest } from '../../services/imageDocAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
-import { useDispatch, useSelector } from 'react-redux';
-import { imageDocUpdated } from '../../redux/sliceReducers/imageDocsSlice';
+import { imageDocDeleted, imageDocUpdated } from '../../redux/sliceReducers/imageDocsSlice';
 
-function PrevArrow({ goPrev }) {
-	return (
-		<div className='slick-prev' onClick={goPrev}>
-			<LeftOutlined />
-		</div>
-	)
-}
-
-function NextArrow({ goNext }) {
-	return (
-		<div className='slick-next' onClick={goNext}>
-			<RightOutlined />
-		</div>
-	)
+function SlideButton({
+	slideCount,
+	currentSlide,
+	changeIndex,
+	children,
+	...props
+}) {
+	useEffect(() => {
+		changeIndex(currentSlide);
+	}, [changeIndex, currentSlide])
+	return <span {...props}>{children}</span>
 }
 
 function ImageDetailsModal(props) {
@@ -39,44 +36,9 @@ function ImageDetailsModal(props) {
 	const authorToken = useSelector(selectToken);
 	const [form] = Form.useForm();
 
+	const [errors, setErrors] = useState([]);
 	const [imageDoc, setImageDoc] = useState(imageDocs[currentIndex]);
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
-	// const [imageCreditErrors, setImageCreditErrors] = useState([]);
-
-	const updateImageCredit = async (values) => {
-		setIsDataSubmitting(true);
-		try {
-			const formData = new FormData();
-			// formData.append('credit', JSON.stringify(values));
-			formData.append('bs', 'you are reading this');
-			const data = await updateImageFileDocRequest({
-				imageId: imageDoc.id, body: formData
-			}, authorToken)
-
-			if (data && data.errors) {
-				form.setFields(
-					data.errors.map(error => ({ name: error.param, errors: [error.msg] }))
-				);
-			} else if (data && data.error) {
-				form.setFields([{ name: 'errors', errors: [data.error] }]);
-			} else if (data && !data.error && !data.errors) {
-				dispatch(imageDocUpdated(data));
-				openNotification({
-					type: 'success',
-					message: 'Successful operation',
-					description: 'Image credit is successfully updated',
-				});
-			}
-		} catch (error) {
-			notifyError(error);
-		} finally {
-			setIsDataSubmitting(false);
-		}
-	}
-
-	useEffect(() => {
-		setImageDoc(imageDocs[currentIndex]);
-	}, [currentIndex, imageDocs]);
 
 	const bytesToKB = (bytes) => {
 		const KB = (bytes / 1024).toFixed(2);
@@ -92,12 +54,72 @@ function ImageDetailsModal(props) {
 		return 1024 * 1024 < bytes ? bytesToMB(bytes) : bytesToKB(bytes);
 	}
 
-	const goToSlider = (index) => {
-		const totalImageDocs = imageDocs.length;
-		const newIndex = index < 0 ? totalImageDocs - 1
-			: index > totalImageDocs - 1 ? 0 : index;
-		changeIndex(newIndex);
+	const clearForm = () => {
+		if (errors.length > 0) {
+			setErrors([]);
+		}
+		form.resetFields()
 	}
+
+	const updateImageCredit = async (values) => {
+		setIsDataSubmitting(true);
+		try {
+			const data = await updateImageFileDocRequest({
+				imageId: imageDoc.id,
+				credit: values,
+				token: authorToken
+			})
+
+			if (data && data.errors) {
+				setErrors(data.errors.map(error => (error.msg)));
+			} else if (data && data.error) {
+				setErrors([data.error]);
+			} else if (data && !data.error && !data.errors) {
+				dispatch(imageDocUpdated(data));
+				openNotification({
+					type: 'success',
+					message: 'Successful operation',
+					description: 'Image credit is successfully updated',
+				});
+				if (errors.length > 0) {
+					setErrors([]);
+				}
+			}
+		} catch (error) {
+			notifyError(error);
+		} finally {
+			setIsDataSubmitting(false);
+		}
+	}
+
+	function handleImageDocDeletion(id, token) {
+		return async () => {
+			try {
+				await deleteImageFileDocRequest(id, token);
+				dispatch(imageDocDeleted(id));
+				closeModal();
+				openNotification({
+					type: 'success',
+					description: `${imageDoc.fileName} successfully deleted`
+				});
+			} catch (error) {
+				notifyError(error)
+			}
+		}
+	}
+
+	useEffect(() => {
+		setImageDoc(imageDocs[currentIndex]);
+	}, [currentIndex, imageDocs]);
+
+	useEffect(() => {
+		form.setFieldsValue({
+			authorName: imageDocs[currentIndex].credit?.authorName || '',
+			authorURL: imageDocs[currentIndex].credit?.authorURL || '',
+			sourceName: imageDocs[currentIndex].credit?.sourceName || '',
+			sourceURL: imageDocs[currentIndex].credit?.sourceURL || ''
+		});
+	}, [imageDoc, form])
 
 	return (
 		<Modal
@@ -110,25 +132,45 @@ function ImageDetailsModal(props) {
 		>
 			<Carousel
 				dots={false}
-				dotPosition='top'
 				arrows
 				initialSlide={currentIndex}
-				prevArrow={<PrevArrow goPrev={() => goToSlider(currentIndex - 1)} />}
-				nextArrow={<NextArrow goNext={() => goToSlider(currentIndex + 1)} />}
+				prevArrow={
+					<SlideButton changeIndex={changeIndex}>
+						<LeftOutlined />
+					</SlideButton>
+				}
+				nextArrow={
+					<SlideButton changeIndex={changeIndex}>
+						<RightOutlined />
+					</SlideButton>
+				}
 			>
 				{
 					imageDocs.map((doc) => (
-						<div key={doc.id}>
-							<img
-								src={getImageUrl(doc.id)}
-								alt={`${doc.fileName}-${doc.id}`}
-								className='grid-image'
-							/>
-						</div>
+						<Fragment key={doc.id}>
+							<div className='carousel-image-wrapper'>
+								<img
+									src={getImageUrl(doc.id)}
+									alt={`${doc.fileName}-${doc.id}`}
+									className='carousel-image'
+								/>
+							</div>
+						</Fragment>
 					))
 				}
-			</Carousel>
-			<div>
+			</Carousel >
+			<Space size='small' direction='vertical' style={{ marginTop: '12px' }}>
+				<Popconfirm
+					title={`Delete ${imageDoc.fileName}`}
+					onConfirm={handleImageDocDeletion(imageDoc.id, authorToken)}
+					description='Are you sure to delete this image?'
+					okText="Yes"
+					cancelText="No"
+				>
+					<Button type="primary" danger>
+						Delete
+					</Button>
+				</Popconfirm>
 				<dl className='image-details'>
 					<dt>File Name</dt>
 					<dd>{imageDoc.fileName}</dd>
@@ -139,13 +181,15 @@ function ImageDetailsModal(props) {
 					<dt>Upload Date</dt>
 					<dd>{moment(imageDoc.uploadDate).format('YYYY-MM-DD')}</dd>
 				</dl>
-				<ImageCreditFieldset
-					loading={isDataSubmitting}
-					handleSubmit={updateImageCredit}
+				<ImageCreditForm
 					form={form}
+					handleSubmit={updateImageCredit}
+					handleReset={clearForm}
 					initialValues={imageDoc.credit}
+					loading={isDataSubmitting}
+					errors={errors}
 				/>
-			</div>
+			</Space>
 		</Modal >
 	)
 }

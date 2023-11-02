@@ -1,37 +1,61 @@
-import { Button, Form, Space, Upload } from 'antd';
-import ImageCreditFieldset from '../ImageUpload/ImageCreditFieldset';
+import { Form, Space } from 'antd';
+import ImageCreditForm from '../Gallery/ImageCreditForm';
 import { createImageFileDocRequest } from '../../services/imageDocAPI';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { imageDocAdded } from '../../redux/sliceReducers/imageDocsSlice';
 import openNotification, { notifyError } from '../../lib/openNotification';
-import { UploadOutlined } from '@ant-design/icons';
-import UploadedImage from '../ImageUpload/UploadedImage';
 import useImageUpload from '../../hooks/useImageUpload';
+import ImageUpload from '../ImageUpload';
 
 function ImageUploader() {
 	const [form] = Form.useForm();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
 
+	const [errors, setErrors] = useState([]);
 	const [uploadedImage, uploadedImageSetters] = useImageUpload();
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
+	const [submittable, setSubmittable] = useState(false);
+
+	useEffect(() => {
+		if (!uploadedImage.file) {
+			setSubmittable(false);
+		} else {
+			setSubmittable(true);
+		}
+	}, [uploadedImage.file])
+
+	const clearForm = () => {
+		if (errors.length > 0) {
+			setErrors([]);
+		}
+		form.resetFields();
+		uploadedImageSetters.reset();
+	}
 
 	const createImageDoc = async (values) => {
 		setIsDataSubmitting(true);
 		try {
-			const formData = new FormData();
-			formData.append('credit', JSON.stringify(values));
-			formData.append('bs', 'you are reading this');
-			const data = await createImageFileDocRequest(formData, authorToken)
-
-			dispatch(imageDocAdded(data));
-			openNotification({
-				type: 'success',
-				message: 'Successful operation',
-				description: 'Image document is successfully created',
-			});
+			const data = await createImageFileDocRequest({
+				credit: values,
+				file: uploadedImage.file,
+				token: authorToken
+			})
+			if (data && data?.errors) {
+				setErrors(
+					data.errors.map(error => (`- ${error.path.split('.')[1]}: ${error.msg}`))
+				);
+			} else {
+				dispatch(imageDocAdded(data));
+				openNotification({
+					type: 'success',
+					message: 'Successful operation',
+					description: 'Image document is successfully created',
+				});
+				clearForm();
+			}
 		} catch (error) {
 			notifyError(error);
 		} finally {
@@ -42,20 +66,20 @@ function ImageUploader() {
 	return (
 		<div className='image-to-db'>
 			<Space className='image-to-db__upload' direction='vertical' size='large'>
-				<UploadedImage
-					imageUrl={uploadedImage}
-					imageAltName={uploadedImageSetters.update}
-					imageLoading={'uploadImage'}
+				<ImageUpload
+					uploadedImage={uploadedImage}
+					updateUploadedImage={uploadedImageSetters.update}
+					uploadElName='uploadImage'
 				/>
-				<Upload maxCount={1} name='uploadImage'>
-					<Button icon={<UploadOutlined />}>Click to upload</Button>
-				</Upload>
 			</Space>
 			<div className='image-to-db__credit'>
-				<ImageCreditFieldset
-					loading={isDataSubmitting}
-					handleSubmit={createImageDoc}
+				<ImageCreditForm
 					form={form}
+					handleSubmit={createImageDoc}
+					handleReset={clearForm}
+					loading={isDataSubmitting}
+					disabled={!submittable}
+					errors={errors}
 				/>
 			</div>
 		</div>

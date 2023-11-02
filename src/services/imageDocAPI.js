@@ -1,3 +1,4 @@
+import { removeEmptyProps } from '../helpers';
 import axiosInstance, {
 	requestOptions
 } from './axiosInstance';
@@ -21,13 +22,19 @@ export const fetchImageFileDocRequest = async () => {
 	}
 }
 
-
-export const createImageFileDocRequest = async (creditData, token) => {
+export const createImageFileDocRequest = async (args) => {
+	const { file, credit, token } = args;
 	try {
+		const formData = new FormData();
+
+		formData.append('credit', JSON.stringify(credit));
+		formData.append('uploadImage', file);
 		const response = await axiosInstance.post(
 			`${baseDirectory}/upload`,
-			{ credit: creditData },
-			requestOptions(token)
+			formData,
+			requestOptions(token, {
+				'Content-Type': 'multipart/form-data'
+			})
 		);
 
 		return response.data;
@@ -36,18 +43,34 @@ export const createImageFileDocRequest = async (creditData, token) => {
 	}
 }
 
-
-export const updateImageFileDocRequest = async (data, token) => {
-	const { body, imageId } = data;
+export const updateImageFileDocRequest = async (args) => {
+	const { credit, imageId, token } = args;
 	try {
+		const formData = new FormData();
+		const trimmedCredit = removeEmptyProps(credit)
+		formData.append('credit', JSON.stringify(trimmedCredit));
+
 		const response = await axiosInstance.put(
 			`${baseDirectory}/${imageId}/update`,
-			body,
+			{ credit: formData.get('credit') },
 			requestOptions(token)
 		);
 
 		return response.data;
 	} catch (error) {
 		throw new Error(`${error.message} (during image file doc update)`);
+	}
+}
+
+export const deleteImageFileDocRequest = async (imageId, token) => {
+	try {
+		const response = await axiosInstance.delete(
+			`${baseDirectory}/${imageId}/doc`,
+			requestOptions(token)
+		);
+
+		return response.data;
+	} catch (error) {
+		throw new Error(`${error.message} (during image file doc deletion)`);
 	}
 }

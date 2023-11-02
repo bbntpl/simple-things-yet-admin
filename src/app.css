@@ -51,3 +51,8 @@
 		width: 60%;
 	}
 }
+
+/*** ANTD class styles overrides ***/
+.-item-explain {
+	color: rgb(255, 25, 25);
+}

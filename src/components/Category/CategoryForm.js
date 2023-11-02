@@ -10,6 +10,7 @@ import { deleteCategoryRequest } from '../../services/categoryAPI';
 import { getImageUrl } from '../../services/helper';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { categoryDeleted } from '../../redux/sliceReducers/categoriesSlice';
+import ImageCreditFieldset from '../ImageUpload/ImageCreditFieldset';
 
 const { Title } = Typography;
 
@@ -94,6 +95,7 @@ export default function CategoryForm(props) {
 							updateUploadedImage={uploadedImageSetters.update}
 							uploadElName='categoryImage'
 						/>
+						<ImageCreditFieldset />
 					</Form.Item>
 					<Form.Item>
 						<Button

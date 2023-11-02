@@ -51,7 +51,7 @@ function ProfilePage() {
 		const fetchImage = async () => {
 			if (author && author.imageFile && !uploadedImage.file) {
 				try {
-					const imageUrl = getImageUrl(author.imageFile);
+					const imageUrl = getImageUrl(author.imageFile.id);
 					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl)
 				} catch (err) {
 					notifyError({ message: err.message });

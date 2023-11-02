@@ -20,8 +20,7 @@ function NavHeader() {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
 	const savedAuthorInfo = useSelector(selectAuthorInfo);
 
-	const avatarSrc = getImageUrl(savedAuthorInfo?.imageFile);
-
+	const avatarSrc = getImageUrl(savedAuthorInfo?.imageFile.id);
 	const handleAuthorLogout = () => {
 		dispatch(logoutAuthor());
 		navigate('/login');

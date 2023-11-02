@@ -79,7 +79,7 @@ export default function ImageUpload(props) {
 	return <>
 		<Upload
 			name={uploadElName}
-			listType="picture-card"
+			listType='picture-card'
 			showUploadList={false}
 			beforeUpload={validateAndProcessFile}
 			onRemove={() => resetUpload()}

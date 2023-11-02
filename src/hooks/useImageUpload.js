@@ -2,14 +2,16 @@ import { useCallback, useState } from 'react';
 import { fetchBlob } from '../services/helper';
 import { convertBlobToFile } from '../helpers/file-handling';
 
+const initialState = {
+	isLoading: false,
+	previewTitle: '',
+	isPreviewOpen: false,
+	url: '',
+	file: null,
+}
+
 export default function useImageUpload() {
-	const [uploadedImage, setUploadedImage] = useState({
-		isLoading: false,
-		previewTitle: '',
-		isPreviewOpen: false,
-		url: '',
-		file: null,
-	});
+	const [uploadedImage, setUploadedImage] = useState(initialState);
 
 	const updateUploadedImage = useCallback((updates) => {
 		setUploadedImage(prevState => ({ ...prevState, ...updates }));
@@ -26,9 +28,14 @@ export default function useImageUpload() {
 		}
 	}
 
+	function resetUploadedImage() {
+		setUploadedImage(initialState);
+	}
+
 	const uploadedImageSetters = {
 		update: updateUploadedImage,
 		downloadImageAndUpdateSources,
+		reset: resetUploadedImage
 	};
 
 	return [

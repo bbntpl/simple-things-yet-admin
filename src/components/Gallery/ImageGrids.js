@@ -9,9 +9,6 @@ import { Spin } from 'antd';
 function ImageGrids(props) {
 	const { imageDocs } = props;
 
-	const [imageUrls, setImageUrls]
-		= useState(imageDocs.map(doc => getImageUrl(doc.id)));
-
 	const [imageDocsWithSizes, setImageDocsWithSizes] = useState([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [imagePreviewIndex, setImagePreviewIndex] = useState(0);
@@ -21,8 +18,8 @@ function ImageGrids(props) {
 	const closeModal = () => setIsModalOpen(false);
 	const changeIndex = (index) => setImagePreviewIndex(index);
 	const handleImagePreview = (index) => {
-		openModal();
 		changeIndex(index);
+		openModal();
 	}
 
 	useEffect(() => {
@@ -67,13 +64,18 @@ function ImageGrids(props) {
 						/>
 					)) : null
 			}
-			<ImageDetailsModal
-				imageDocs={imageDocs}
-				isModalOpen={isModalOpen}
-				closeModal={closeModal}
-				changeIndex={changeIndex}
-				currentIndex={imagePreviewIndex}
-			/>
+			{
+				// This component is conditionally displayed because the react slick
+				// cannot be programatically change its index except by clicking arrows
+				isModalOpen ?
+					<ImageDetailsModal
+						imageDocs={imageDocs}
+						isModalOpen={isModalOpen}
+						closeModal={closeModal}
+						changeIndex={changeIndex}
+						currentIndex={imagePreviewIndex}
+					/> : null
+			}
 		</div>
 	)
 }
