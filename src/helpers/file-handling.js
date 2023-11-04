@@ -46,4 +46,3 @@ export function convertBlobToFile(blob) {
 	const file = new File([blob], fileName, { type: blob.type, lastModified: Date.now() });
 	return file;
 }
-

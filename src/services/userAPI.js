@@ -43,10 +43,12 @@ export const updateAuthor = async (data, token) => {
 	}
 }
 
-export const updateAuthorImage = async (file, token) => {
+export const updateAuthorImage = async (data, token) => {
+	const { file, existingImageId } = data;
 	try {
 		return await updateImageRequest({
 			file,
+			existingImageId,
 			token,
 			formDataName: 'authorImage',
 			endpoint: `${baseDirectory}/update/image`
@@ -56,12 +58,22 @@ export const updateAuthorImage = async (file, token) => {
 	}
 }
 
-export const getUser = async () => {
+export const getAuthor = async () => {
 	try {
 		const response = await axiosInstance.get(baseDirectory);
 		return response.data;
 	} catch (error) {
 		throw new Error(`${error} (during author fetch)`);
+	}
+}
+
+
+export const getAuthorInfo = async () => {
+	try {
+		const response = await axiosInstance.get(`${baseDirectory}/info`);
+		return response.data;
+	} catch (error) {
+		throw new Error(`${error} (during author info fetch)`);
 	}
 }
 

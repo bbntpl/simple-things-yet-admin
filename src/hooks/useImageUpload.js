@@ -8,6 +8,7 @@ const initialState = {
 	isPreviewOpen: false,
 	url: '',
 	file: null,
+	existingImageId: null,
 }
 
 export default function useImageUpload() {
@@ -22,10 +23,25 @@ export default function useImageUpload() {
 			const imageBlob = await fetchBlob(imageUrl);
 			const file = convertBlobToFile(imageBlob);
 			const url = URL.createObjectURL(imageBlob);
-			updateUploadedImage({ url, file });
+			updateUploadedImage({
+				url,
+				file,
+				existingImageId: null,
+				previewTitle: file.name || file.url.substring(file.url.lastIndex('/') + 1)
+			});
 		} catch (error) {
 			console.error('Error downloading image:', error);
 		}
+	}
+
+	async function addExistingImageFromDB(params) {
+		const { url, imageId, previewTitle } = params;
+		updateUploadedImage({
+			url,
+			file: null,
+			existingImageId: imageId,
+			previewTitle: previewTitle || ''
+		});
 	}
 
 	function resetUploadedImage() {
@@ -35,7 +51,8 @@ export default function useImageUpload() {
 	const uploadedImageSetters = {
 		update: updateUploadedImage,
 		downloadImageAndUpdateSources,
-		reset: resetUploadedImage
+		reset: resetUploadedImage,
+		addExistingImage: addExistingImageFromDB
 	};
 
 	return [

@@ -47,8 +47,16 @@ export default function BlogsPageByCategory() {
 	const handleUpdate = async (values) => {
 		setIsDataSubmitting(true);
 		try {
+			console.log(values, uploadedImage);
+			throw new Error('test 123');
 			await updateCategoryImageRequest({
 				file: uploadedImage.file,
+				credit: {
+					authorName: values.authorName,
+					authorURL: values.authorURL || '',
+					sourceName: values.sourceName || '',
+					sourceURL: values.sourceURL || ''
+				},
 				token: authorToken,
 				categoryId: category.id
 			})

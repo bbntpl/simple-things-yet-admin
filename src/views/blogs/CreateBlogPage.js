@@ -86,8 +86,8 @@ function CreateBlogPage() {
 					content: blog.content,
 					isPrivate: blog.isPrivate,
 					tags: extractIds({ docs: tags, values: blog.tags, key: 'name' }),
-					// If there are no ids, pass 'NONE' instead
-					category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || 'NONE'
+					// If there are no ids, pass 'NULL' instead
+					category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || 'NULL'
 				},
 				token: authorToken,
 				publishAction,

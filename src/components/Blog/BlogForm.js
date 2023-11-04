@@ -12,10 +12,10 @@ import {
 } from 'antd';
 import ReactQuill from 'react-quill';
 import { useNavigate, useParams } from 'react-router-dom';
-import ImageUpload from '../ImageUpload';
 import { useEffect } from 'react';
+
 import { getImageUrl } from '../../services/helper';
-import ImageCreditFieldset from '../ImageUpload/ImageCreditFieldset';
+import ImageUploadFormItem from '../ImageUploadFormItem';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -139,19 +139,12 @@ export default function BlogForm({
 								options={getTagOptions(blogTags)}
 							/>
 						</Form.Item>
-						<Form.Item
-							label='Upload blog preview image'
-							style={{ width: 'max-content' }}
-						>
-							<Space direction='vertical'>
-								<ImageUpload
-									uploadedImage={uploadedImage}
-									updateUploadedImage={uploadedImageSetters.update}
-									uploadElName='categoryImage'
-								/>
-								<ImageCreditFieldset />
-							</Space>
-						</Form.Item>
+						<ImageUploadFormItem
+							formItemLabel={'Upload cover image'}
+							uploadedImageSetters={uploadedImageSetters}
+							uploadedImage={uploadedImage}
+							uploadElName='blogImage'
+						/>
 						<Form.Item
 							valuePropName='checked'
 							label='Private'

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Row, Col, Layout, Form, Input, Button, Typography, Space } from 'antd';
 
-import { getUser, loginUser, registerUser } from '../../services/userAPI';
+import { getAuthorInfo, loginUser, registerUser } from '../../services/userAPI';
 import { loginAuthor, selectLoggedAuthor, updateAuthorInfo } from '../../redux/sliceReducers/loggedAuthorSlice';
 
 import openNotification from '../../lib/openNotification';
@@ -74,7 +74,7 @@ function AuthForm({ authFormType }) {
 	}
 
 	const saveAuthorInfo = async () => {
-		const result = await getUser();
+		const result = await getAuthorInfo();
 		dispatch(updateAuthorInfo({ info: result }));
 	}
 
@@ -83,35 +83,32 @@ function AuthForm({ authFormType }) {
 		return await loginUser(authorToLogin);
 	}
 
-	const submitAuthorForm = () => {
+	const submitAuthorForm = async () => {
 		setIsLoading(true);
-		setTimeout(async () => {
-			try {
-				let response;
-				if (authFormType === 'register') {
-					response = await submitAuthorRegistration();
-				} else if (authFormType === 'login') {
-					response = await submitAuthorLogin();
-					await saveAuthorInfo();
+		try {
+			let response;
+			if (authFormType === 'register') {
+				response = await submitAuthorRegistration();
+			} else if (authFormType === 'login') {
+				response = await submitAuthorLogin();
+				if (!response?.errors) {
 					handleAuthorLogin(response);
-				} else {
-					throw new Error('There is something wrong with authFormType...');
+					await saveAuthorInfo();
 				}
-
-				const { errors } = response;
-				if (errors) {
-					setIsLoading(false);
-					setErrorMessages(errors);
-				} else {
-					setIsLoading(false);
-					setErrorMessages([]);
-					redirectAfterSuccess(authFormType);
-				}
-			} catch (error) {
-				setIsLoading(false);
-				setErrorMessages([{ msg: error.message }]);
 			}
-		}, 500)
+
+			const { errors } = response;
+			if (errors) {
+				setErrorMessages(errors);
+			} else {
+				setErrorMessages([]);
+				redirectAfterSuccess(authFormType);
+			}
+		} catch (error) {
+			setErrorMessages([{ msg: error.message }]);
+		} finally {
+			setIsLoading(false);
+		}
 	}
 
 	const resetFields = (e) => {

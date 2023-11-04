@@ -3,12 +3,12 @@ import { Image } from 'antd';
 import './styles.css';
 
 function ImageDisplay(props) {
-	const { handleImagePreview, imageDoc } = props;
+	const { handleClick, imageDoc } = props;
 
 	return (
 		<Image
 			preview={false}
-			onClick={handleImagePreview || null}
+			onClick={handleClick || null}
 			key={imageDoc.id}
 			src={imageDoc.url}
 			alt={`${imageDoc.fileName}-${imageDoc.id}`}

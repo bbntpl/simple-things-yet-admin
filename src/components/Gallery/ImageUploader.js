@@ -1,13 +1,14 @@
 import { Form, Space } from 'antd';
-import ImageCreditForm from '../Gallery/ImageCreditForm';
-import { createImageFileDocRequest } from '../../services/imageDocAPI';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+import openNotification, { notifyError } from '../../lib/openNotification';
+import ImageCreditForm from '../Gallery/ImageCreditForm';
+import { createImageFileDocRequest } from '../../services/imageDocAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { imageDocAdded } from '../../redux/sliceReducers/imageDocsSlice';
-import openNotification, { notifyError } from '../../lib/openNotification';
 import useImageUpload from '../../hooks/useImageUpload';
-import ImageUpload from '../ImageUpload';
+import ImageUpload from '../ImageUploadFormItem/ImageUpload';
 
 function ImageUploader() {
 	const [form] = Form.useForm();
@@ -68,8 +69,9 @@ function ImageUploader() {
 			<Space className='image-to-db__upload' direction='vertical' size='large'>
 				<ImageUpload
 					uploadedImage={uploadedImage}
-					updateUploadedImage={uploadedImageSetters.update}
+					uploadedImageSetters={uploadedImageSetters}
 					uploadElName='uploadImage'
+					showImagesDb={false}
 				/>
 			</Space>
 			<div className='image-to-db__credit'>

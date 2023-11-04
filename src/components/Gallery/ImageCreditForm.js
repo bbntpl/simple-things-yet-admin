@@ -1,7 +1,7 @@
 import { Button, Form, Space } from 'antd';
 import Title from 'antd/es/typography/Title';
 
-import ImageCreditFieldset from '../ImageUpload/ImageCreditFieldset';
+import ImageCreditFieldset from '../ImageUploadFormItem/ImageCreditFieldset';
 
 function ImageCreditForm(props) {
 	const {
@@ -24,7 +24,7 @@ function ImageCreditForm(props) {
 			<Title level={3}>
 				Image Credit
 			</Title>
-			<ImageCreditFieldset />
+			<ImageCreditFieldset disabled={disabled} />
 			<Form.Item>
 				<Space>
 					<Button

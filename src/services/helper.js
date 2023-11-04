@@ -22,10 +22,15 @@ export function getImageUrl(imageId) {
 }
 
 export async function updateImageRequest(args) {
-	const { file, token, formDataName, endpoint } = args;
+	const { file, existingImageId, token, formDataName, endpoint } = args;
 
 	const formData = new FormData();
 	formData.append(formDataName, file);
+	formData.append('existingImageId', existingImageId || 'NULL')
+
+	if (args?.credit) {
+		formData.append('credit', JSON.stringify(args.credit))
+	}
 
 	const response = await axiosInstance.put(
 		endpoint,

@@ -5,73 +5,52 @@ import { Form, Input, Button, Typography, Layout } from 'antd';
 
 import openNotification, { notifyError } from '../lib/openNotification';
 import AuthorComments from '../components/AuthorComments';
-import ImageUpload from '../components/ImageUpload';
+import ImageUploadFormItem from '../components/ImageUploadFormItem';
 
 import {
-	getUser,
+	getAuthorInfo,
 	updateAuthor,
 	updateAuthorImage,
 } from '../services/userAPI';
-import { getImageUrl } from '../services/helper';
 import {
 	selectAuthorInfo,
 	selectLoggedAuthor,
 	updateAuthorInfo
 } from '../redux/sliceReducers/loggedAuthorSlice';
 import useImageUpload from '../hooks/useImageUpload';
+import { imageDocAdded } from '../redux/sliceReducers/imageDocsSlice';
+import { fetchImageFileDocRequest } from '../services/imageDocAPI';
 
 const { Title, Text } = Typography;
 
-function ProfilePage() {
+export default function ProfilePage() {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
 	const savedAuthorInfo = useSelector(selectAuthorInfo);
 	const dispatch = useDispatch();
-
 	const [uploadedImage, uploadedImageSetters] = useImageUpload();
-
 	const [form] = Form.useForm();
+
 	const [author, setAuthor] = useState(savedAuthorInfo || null);
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
-
-	useEffect(() => {
-		// If saved author info from redus is available, then there is no need to do api request
-		// Therefore, initialize the fields value using the already saved data
-		if (savedAuthorInfo) {
-			form.setFieldsValue(savedAuthorInfo);
-		} else {
-			getUser().then((result) => {
-				setAuthor(result);
-				dispatch(updateAuthorInfo({ info: result }))
-				form.setFieldsValue(result);
-			});
-		}
-	}, [form]);
-
-	useEffect(() => {
-		const fetchImage = async () => {
-			if (author && author.imageFile && !uploadedImage.file) {
-				try {
-					const imageUrl = getImageUrl(author.imageFile.id);
-					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl)
-				} catch (err) {
-					notifyError({ message: err.message });
-				}
-			}
-		};
-
-		fetchImage();
-	}, [author]);
 
 	const handleAuthorUpdate = async (values) => {
 		setIsDataSubmitting(true);
 		try {
-			await updateAuthorImage(uploadedImage.file, loggedAuthor.token);
+			await updateAuthorImage({
+				file: uploadedImage.file,
+				existingImageId: uploadedImage.existingImageId
+			}, loggedAuthor.token);
+
 			const updatedAuthor = await updateAuthor(values, loggedAuthor.token);
 			dispatch(updateAuthorInfo({ info: updatedAuthor }));
+			if (!uploadedImage.existingImageId && uploadedImage.file) {
+				const result = await fetchImageFileDocRequest(updatedAuthor.imageFile);
+				dispatch(imageDocAdded(result));
+			}
 			openNotification({
 				type: 'success',
 				message: 'Operation successful',
-				description: 'Successfully updated author data and image'
+				description: 'Successfully updated author data'
 			});
 		} catch (error) {
 			notifyError(error);
@@ -80,7 +59,21 @@ function ProfilePage() {
 		}
 	}
 
-	const handleQuillChange = (content) => form.setFieldsValue({ bio: content });
+	const handleQuillChange = (content) => form.setFieldsValue({ bio: content })
+
+	useEffect(() => {
+		// If saved author info from redus is available, then there is no need to do api request
+		// Therefore, initialize the fields value using the already saved data
+		if (savedAuthorInfo) {
+			form.setFieldsValue(savedAuthorInfo);
+		} else {
+			getAuthorInfo().then((result) => {
+				setAuthor(result);
+				dispatch(updateAuthorInfo({ info: result }))
+				form.setFieldsValue(result);
+			});
+		}
+	}, [savedAuthorInfo]);
 
 	if (author === null) return;
 	return (
@@ -103,13 +96,14 @@ function ProfilePage() {
 						onChange={handleQuillChange}
 					/>
 				</Form.Item>
-				<Form.Item label='Upload your picture'>
-					<ImageUpload
-						uploadedImage={uploadedImage}
-						updateUploadedImage={uploadedImageSetters.update}
-						uploadElName='authorImage'
-					/>
-				</Form.Item>
+				<ImageUploadFormItem
+					formItemLabel='Upload author picture'
+					uploadedImageSetters={uploadedImageSetters}
+					uploadedImage={uploadedImage}
+					uploadElName='authorImage'
+					showCreditFieldset={false}
+					document={author}
+				/>
 				<Form.Item wrapperCol={{ span: 24 }} style={{ textAlign: 'right' }}>
 					<Button
 						type='primary'
@@ -129,5 +123,3 @@ function ProfilePage() {
 		</Layout >
 	);
 }
-
-export default ProfilePage;

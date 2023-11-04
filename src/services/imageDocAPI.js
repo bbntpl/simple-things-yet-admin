@@ -13,9 +13,9 @@ export const fetchImageFileDocsRequest = async () => {
 	}
 }
 
-export const fetchImageFileDocRequest = async () => {
+export const fetchImageFileDocRequest = async (imageId) => {
 	try {
-		const response = await axiosInstance.get(`${baseDirectory}/doc`);
+		const response = await axiosInstance.get(`${baseDirectory}/${imageId}/doc`);
 		return response.data;
 	} catch (error) {
 		throw new Error(`${error.message} (during image file doc fetch)`);

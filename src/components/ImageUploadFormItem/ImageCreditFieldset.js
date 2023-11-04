@@ -1,7 +1,7 @@
 import { Form, Input, Space } from 'antd';
 import './styles.css';
 
-function ImageCreditFieldset() {
+function ImageCreditFieldset({ disabled = false }) {
 	return (
 		<>
 			<Form.Item label='Author/Owner'>
@@ -14,7 +14,7 @@ function ImageCreditFieldset() {
 							message: 'Must be a valid string'
 						}]}
 					>
-						<Input placeholder='Author name' />
+						<Input placeholder='Author name' disabled={disabled} />
 					</Form.Item>
 					<Form.Item
 						name='authorURL'
@@ -25,7 +25,7 @@ function ImageCreditFieldset() {
 							message: 'Must be a valid URL'
 						}]}
 					>
-						<Input placeholder='URL to the author' />
+						<Input placeholder='URL to the author' disabled={disabled} />
 					</Form.Item>
 				</Space.Compact>
 			</Form.Item >
@@ -39,7 +39,7 @@ function ImageCreditFieldset() {
 							message: 'Must be a valid string'
 						}]}
 					>
-						<Input placeholder='Source name' />
+						<Input placeholder='Source name' disabled={disabled} />
 					</Form.Item>
 					<Form.Item
 						name='sourceURL'
@@ -50,7 +50,7 @@ function ImageCreditFieldset() {
 							message: 'Must be a valid URL'
 						}]}
 					>
-						<Input placeholder='URL of image source' />
+						<Input placeholder='URL of image source' disabled={disabled} />
 					</Form.Item>
 				</Space.Compact>
 			</Form.Item>

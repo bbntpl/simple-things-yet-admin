@@ -11,7 +11,7 @@
 }
 
 .image-grid-container {
-  column-count: 3;
+  column-count: 2;
   column-gap: 10px;
 }
 
@@ -24,13 +24,9 @@
   cursor: pointer;
   grid-row: 1 / -1;
   grid-column: 1;
-}
-
-.grid-image {
-  width: 100%;
-  height: auto;
+   width: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease-in-out;
+  transition: opacity .8s ease-in-out 
 }
 
 .carousel-image-wrapper {
