@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Form, Layout, Spin } from 'antd';
 
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { categoryBlogsUpdated, fetchCategories, selectCategories } from '../../redux/sliceReducers/categoriesSlice';
 import { blogAdded } from '../../redux/sliceReducers/blogsSlice';
 import { createBlogRequest } from '../../services/blogAPI';
-import openNotification, { notifyError } from '../../lib/openNotification';
+import { notifyError, notifySuccess } from '../../lib/openNotification';
 import BlogForm from '../../components/Blog/BlogForm';
 import Title from 'antd/es/typography/Title';
-import { Form, Layout, Spin } from 'antd';
 import { fetchTags, selectTags, tagBlogsUpdated } from '../../redux/sliceReducers/tagsSlice';
 import { extractIds } from '../../helpers';
 import useImageUpload from '../../hooks/useImageUpload';
@@ -25,6 +25,7 @@ function CreateBlogPage() {
 
 	const [form] = Form.useForm();
 	const [uploadedImage, uploadedImageSetters] = useImageUpload();
+	const [errors, setErrors] = useState([]);
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
 	const initialFormValues = {
@@ -65,16 +66,10 @@ function CreateBlogPage() {
 		}
 		navigate(navigateTo);
 		const msgAction = publishAction === 'save' ? 'saved as draft' : 'published';
-		openNotification({
-			type: 'success',
-			message: 'Successful operation',
-			description: `New blog "${updatedBlog.title}" is successfully ${msgAction}`,
-		});
+		notifySuccess(`New blog "${updatedBlog.title}" is successfully ${msgAction}`);
 	}
 
-	const handleError = (data) => {
-		form.setFields([{ name: 'title', errors: [data.error] }]);
-	}
+	const handleError = (errors) => setErrors([...errors]);
 
 	const handleBlogCreate = async (publishAction) => {
 		setIsDataSubmitting(true);
@@ -89,13 +84,19 @@ function CreateBlogPage() {
 					// If there are no ids, pass 'NULL' instead
 					category: extractIds({ docs: categories, values: [blog.category], key: 'name' })[0] || 'NULL'
 				},
-				token: authorToken,
+				credit: {
+					authorName: blog?.authorName || '',
+					authorURL: blog?.authorURL || '',
+					sourceName: blog?.sourceName || '',
+					sourceURL: blog?.sourceURL || ''
+				},
+				existingImageId: uploadedImage.existingImageId,
 				publishAction,
 				...(uploadedImage.file ? { file: uploadedImage.file } : {})
-			});
+			}, authorToken);
 
 			if (data && data.error) {
-				handleError(data);
+				handleError([data.error]);
 			} else if (data && !data.error && !data.errors) {
 				handleSuccess(data, publishAction);
 			}
@@ -116,7 +117,7 @@ function CreateBlogPage() {
 	return <Layout>
 		<Title level={3}>Create a new blog</Title>
 		<BlogForm
-			initialFormValues={initialFormValues}
+			blog={initialFormValues}
 			blogCategories={categories}
 			blogTags={tags}
 			handleBlogSubmit={handleBlogSubmit}
@@ -125,6 +126,7 @@ function CreateBlogPage() {
 			form={form}
 			uploadedImage={uploadedImage}
 			uploadedImageSetters={uploadedImageSetters}
+			errors={errors}
 		/>
 	</Layout>
 }

@@ -6,7 +6,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 import { getImageUrl } from '../../services/helper';
 import ImageCreditForm from '../Gallery/ImageCreditForm';
-import openNotification, { notifyError } from '../../lib/openNotification';
+import { notifyError, notifySuccess } from '../../lib/openNotification';
 import { deleteImageFileDocRequest, updateImageFileDocRequest } from '../../services/imageDocAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { imageDocDeleted, imageDocUpdated } from '../../redux/sliceReducers/imageDocsSlice';
@@ -76,11 +76,7 @@ function ImageDetailsModal(props) {
 				setErrors([data.error]);
 			} else if (data && !data.error && !data.errors) {
 				dispatch(imageDocUpdated(data));
-				openNotification({
-					type: 'success',
-					message: 'Successful operation',
-					description: 'Image credit is successfully updated',
-				});
+				notifySuccess('Image credit is successfully updated');
 				if (errors.length > 0) {
 					setErrors([]);
 				}
@@ -97,11 +93,8 @@ function ImageDetailsModal(props) {
 			try {
 				await deleteImageFileDocRequest(id, token);
 				dispatch(imageDocDeleted(id));
+				notifySuccess(`${imageDoc.fileName} successfully deleted`);
 				closeModal();
-				openNotification({
-					type: 'success',
-					description: `${imageDoc.fileName} successfully deleted`
-				});
 			} catch (error) {
 				notifyError(error)
 			}

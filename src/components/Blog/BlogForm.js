@@ -12,10 +12,9 @@ import {
 } from 'antd';
 import ReactQuill from 'react-quill';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect } from 'react';
 
-import { getImageUrl } from '../../services/helper';
 import ImageUploadFormItem from '../ImageUploadFormItem';
+import { useEffect } from 'react';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -33,7 +32,7 @@ const toolbarOprions = [
 ];
 
 export default function BlogForm({
-	initialFormValues,
+	blog,
 	blogCategories,
 	blogTags,
 	handleSaveDraft,
@@ -44,6 +43,7 @@ export default function BlogForm({
 	uploadedImage,
 	uploadedImageSetters,
 	form,
+	errors
 }) {
 	const { id } = useParams();
 	const navigate = useNavigate();
@@ -73,39 +73,27 @@ export default function BlogForm({
 		}
 	}
 
+
 	useEffect(() => {
-		if (isEditing) {
-			if (initialFormValues && initialFormValues.imageFile) {
-				const imageFile = form.getFieldsValue() && form.getFieldsValue().imageFile
-					? form.getFieldsValue().imageFile
-					: initialFormValues.imageFile;
-
-				const initializeExistingImageAndFile = async () => {
-					const imageUrl = getImageUrl(imageFile);
-					await uploadedImageSetters.downloadImageAndUpdateSources(imageUrl);
-				}
-
-				initializeExistingImageAndFile();
-			}
+		if (isEditing && blog) {
+			// Initialize the blog values
+			const fieldsToBeEdited = [
+				{ name: 'title', value: blog.title },
+				{ name: 'content', value: blog.content },
+				{ name: 'category', value: (blogCategories.find(cat => cat.id === blog.category) || {}).name || undefined },
+				{ name: 'tags', value: extractTagNames(blog.tags) },
+				{ name: 'isPrivate', value: blog.isPrivate },
+				{ name: 'imageFile', value: blog.imageFile }
+			];
+			form.setFields(fieldsToBeEdited);
 		}
-	}, [isEditing, form])
+	}, [isEditing, blog, form])
 
 	return (
 		<>
 			<Row justify='center'>
 				<Col xs={24} sm={24} md={18} lg={12}>
-					<Form
-						layout='vertical'
-						form={form}
-						initialValues={{
-							title: initialFormValues.title,
-							content: initialFormValues.content,
-							category: (blogCategories.find(cat => cat.id === initialFormValues.category) || {}).name || undefined,
-							tags: extractTagNames(initialFormValues.tags),
-							isPrivate: initialFormValues.isPrivate,
-							imageFile: initialFormValues.imageFile
-						}}
-					>
+					<Form layout='vertical' form={form}>
 						<Form.Item label='Title' name='title'>
 							<Input placeholder='Blog title' />
 						</Form.Item>
@@ -144,6 +132,8 @@ export default function BlogForm({
 							uploadedImageSetters={uploadedImageSetters}
 							uploadedImage={uploadedImage}
 							uploadElName='blogImage'
+							document={blog}
+							form={form}
 						/>
 						<Form.Item
 							valuePropName='checked'
@@ -161,15 +151,15 @@ export default function BlogForm({
 								modules={{ toolbar: toolbarOprions }}
 							/>
 						</Form.Item>
+						<Form.ErrorList errors={errors} />
 						<Form.Item>
 							<Space style={{ display: 'flex', flexWrap: 'wrap' }}>
 								{
 									isEditing &&
 									<Button
 										type='dashed'
-
 										loading={isDataSubmitting}
-										onClick={() => navigateToPreviewPage(initialFormValues.isPublished)}
+										onClick={() => navigateToPreviewPage(blog.isPublished)}
 									>
 										Preview
 									</Button>
@@ -182,7 +172,7 @@ export default function BlogForm({
 								</Button>
 								{
 									// Display publish button if blog is not yet published
-									!initialFormValues?.isPublished &&
+									!blog?.isPublished &&
 									<Popconfirm
 										title='Publish the blog'
 										description='Are you sure you want to publish this blog'

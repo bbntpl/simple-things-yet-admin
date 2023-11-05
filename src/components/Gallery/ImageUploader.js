@@ -2,7 +2,7 @@ import { Form, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import openNotification, { notifyError } from '../../lib/openNotification';
+import { notifyError, notifySuccess } from '../../lib/openNotification';
 import ImageCreditForm from '../Gallery/ImageCreditForm';
 import { createImageFileDocRequest } from '../../services/imageDocAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
@@ -50,11 +50,7 @@ function ImageUploader() {
 				);
 			} else {
 				dispatch(imageDocAdded(data));
-				openNotification({
-					type: 'success',
-					message: 'Successful operation',
-					description: 'Image document is successfully created',
-				});
+				notifySuccess('Image document is successfully created');
 				clearForm();
 			}
 		} catch (error) {

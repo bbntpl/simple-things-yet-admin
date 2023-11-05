@@ -7,7 +7,7 @@ import { Row, Col, Layout, Form, Input, Button, Typography, Space } from 'antd';
 import { getAuthorInfo, loginUser, registerUser } from '../../services/userAPI';
 import { loginAuthor, selectLoggedAuthor, updateAuthorInfo } from '../../redux/sliceReducers/loggedAuthorSlice';
 
-import openNotification from '../../lib/openNotification';
+import { notifySuccess } from '../../lib/openNotification';
 import FormErrors from '../FormErrors';
 
 const { Title } = Typography;
@@ -49,13 +49,11 @@ function AuthForm({ authFormType }) {
 	}
 
 	const notifyAfterSuccess = (authFormType) => {
-		openNotification({
-			type: 'success',
-			message: 'Operation success',
-			description: `${authFormType === 'register'
-				? 'Registered'
-				: 'Logged in'} successfully`
-		});
+		const successMsg = `${authFormType === 'register'
+			? 'Registered'
+			: 'Logged in'} successfully`;
+
+		notifySuccess(successMsg);
 	}
 
 	const handleAuthorLogin = (authorCredentials) => {

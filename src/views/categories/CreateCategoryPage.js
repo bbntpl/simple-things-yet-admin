@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form } from 'antd';
 
 import { createCategoryRequest } from '../../services/categoryAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { categoryAdded } from '../../redux/sliceReducers/categoriesSlice';
-import openNotification, { notifyError } from '../../lib/openNotification';
+import { notifyError, notifySuccess } from '../../lib/openNotification';
 import CategoryForm from '../../components/Category/CategoryForm';
-import { useState } from 'react';
 import useImageUpload from '../../hooks/useImageUpload';
 
 function CreateCategoryPage() {
@@ -16,34 +16,33 @@ function CreateCategoryPage() {
 	const authorToken = useSelector(selectToken);
 
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
+	const [errors, setErrors] = useState([]);
 	const [uploadedImage, uploadedImageSetters] = useImageUpload();
 	const [form] = Form.useForm();
 
 	const handleSubmit = async (values) => {
 		setIsDataSubmitting(true);
 		try {
-			const formData = new FormData();
-			formData.append('name', values.name);
-			formData.append('description', values.description || '');
-			if (uploadedImage.file) {
-				formData.append('categoryImage', uploadedImage.file);
-			}
-			const data = await createCategoryRequest(formData, authorToken);
-
+			const data = await createCategoryRequest({
+				name: values.name,
+				description: values?.description || '',
+				credit: {
+					authorName: values?.authorName || '',
+					authorURL: values?.authorURL || '',
+					sourceName: values?.sourceName || '',
+					sourceURL: values?.sourceURL || ''
+				},
+				file: uploadedImage.file,
+				existingImageId: uploadedImage.existingImageId
+			}, authorToken);
 			if (data && data.errors) {
-				form.setFields(
-					data.errors.map(error => ({ name: error.path, errors: [error.msg] }))
-				);
+				setErrors(data.errors.map(error => error.msg));
 			} else if (data && data.error) {
-				form.setFields([{ name: '', errors: [data.error] }]);
+				setErrors([data.error]);
 			} else if (data && !data.error && !data.errors) {
 				dispatch(categoryAdded(data));
 				navigate('/dashboard');
-				openNotification({
-					type: 'success',
-					message: 'Successful operation',
-					description: `New category "${data.name}" is successfully submitted`,
-				});
+				notifySuccess(`New category "${data.name}" is successfully submitted`);
 			}
 		} catch (error) {
 			notifyError(error);
@@ -58,6 +57,7 @@ function CreateCategoryPage() {
 		uploadedImage={uploadedImage}
 		uploadedImageSetters={uploadedImageSetters}
 		isDataSubmitting={isDataSubmitting}
+		errors={errors}
 	/>
 }
 

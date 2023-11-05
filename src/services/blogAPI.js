@@ -1,3 +1,4 @@
+import { removeEmptyProps } from '../helpers';
 import axiosInstance, { requestOptions } from './axiosInstance';
 import { fetchImageRequest, updateImageRequest } from './helper';
 const baseDirectory = '/blogs';
@@ -28,8 +29,8 @@ export const fetchBlogByIdRequest = async (id) => {
 	}
 }
 
-export const createBlogRequest = async (args) => {
-	const { blog, token, publishAction, file } = args;
+export const createBlogRequest = async (args, token) => {
+	const { blog, publishAction, file, credit, existingImageId } = args;
 	try {
 		const formData = new FormData();
 
@@ -45,7 +46,11 @@ export const createBlogRequest = async (args) => {
 			}
 		}
 
+		formData.append('existingImageId', existingImageId || 'NULL');
+
 		if (file) {
+			const trimmedCredit = removeEmptyProps(credit);
+			formData.append('credit', JSON.stringify(trimmedCredit));
 			formData.append('blogImage', file);
 		}
 
@@ -59,11 +64,11 @@ export const createBlogRequest = async (args) => {
 	}
 }
 
-export const updateBlogRequest = async (args) => {
-	const { blogId, updatedBlog, token, publishAction } = args;
+export const updateBlogRequest = async (args, token) => {
+	const { blogId, updatedBlog, publishAction } = args;
 	try {
 		const response = await axiosInstance.put(
-			`${baseDirectory}/${blogId}/${publishAction}/authors-only`,
+			`${baseDirectory}/${blogId}/${publishAction}`,
 			updatedBlog,
 			requestOptions(token));
 
@@ -73,14 +78,16 @@ export const updateBlogRequest = async (args) => {
 	}
 }
 
-export const updateBlogImageRequest = async (args) => {
-	const { file, token, blogId } = args;
+export const updateBlogImageRequest = async (args, token) => {
+	const { file, existingImageId, credit, blogId } = args;
 	try {
 		return await updateImageRequest({
 			file,
 			token,
+			existingImageId,
+			credit,
 			formDataName: 'blogImage',
-			endpoint: `${baseDirectory}/${blogId}/image-update/authors-only`
+			endpoint: `${baseDirectory}/${blogId}/image-update`
 		});
 	} catch (error) {
 		throw new Error(`${error} (during blog image update)`);
@@ -100,7 +107,3 @@ export const deleteBlogRequest = async (id, token) => {
 		throw new Error(`${error} (during blog deletion)`);
 	}
 }
-
-export const getBlogImageUrl = (imageId) => {
-	return `${process.env.REACT_APP_API_URL}${baseDirectory}/${imageId}/image`;
-};

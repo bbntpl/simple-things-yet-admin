@@ -3,7 +3,7 @@ import ReactQuill from 'react-quill';
 import { useDispatch, useSelector } from 'react-redux';
 import { Form, Input, Button, Typography, Layout } from 'antd';
 
-import openNotification, { notifyError } from '../lib/openNotification';
+import { notifyError, notifySuccess } from '../lib/openNotification';
 import AuthorComments from '../components/AuthorComments';
 import ImageUploadFormItem from '../components/ImageUploadFormItem';
 
@@ -47,11 +47,7 @@ export default function ProfilePage() {
 				const result = await fetchImageFileDocRequest(updatedAuthor.imageFile);
 				dispatch(imageDocAdded(result));
 			}
-			openNotification({
-				type: 'success',
-				message: 'Operation successful',
-				description: 'Successfully updated author data'
-			});
+			notifySuccess('Successfully updated author data');
 		} catch (error) {
 			notifyError(error);
 		} finally {

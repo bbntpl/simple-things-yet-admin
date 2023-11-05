@@ -25,4 +25,12 @@ export const notifyError = (error, message = 'Operation failed') => {
 	})
 }
 
+export const notifySuccess = (message) => {
+	openNotification({
+		type: 'success',
+		description: message,
+		message: 'Successful operation'
+	})
+}
+
 export default openNotification;

@@ -75,11 +75,7 @@ function BlogPage() {
 				const response = await createAuthorCommentRequest(newComment, loggedAuthor.token);
 				setIsLoading(false);
 				dispatch(createAuthorComment(response));
-				openNotification({
-					type: 'success',
-					message: 'Successful operation',
-					description: 'New comment is succesfully submitted'
-				})
+				openNotification('Your comment is succesfully submitted');
 			} catch (error) {
 				setIsLoading(false);
 				notifyError(error)

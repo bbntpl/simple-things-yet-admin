@@ -1,3 +1,4 @@
+import { removeEmptyProps } from '../helpers';
 import axiosInstance, {
 	requestOptions
 } from './axiosInstance';
@@ -30,11 +31,23 @@ export const fetchCategoryImageRequest = async (imageId) => {
 	}
 }
 
-export const createCategoryRequest = async (category, token) => {
+export const createCategoryRequest = async (data, token) => {
+	const { name, description, credit, file, existingImageId } = data;
 	try {
+		const formData = new FormData();
+		formData.append('name', name);
+		formData.append('description', description);
+		formData.append('existingImageId', existingImageId || 'NULL');
+
+		if (file) {
+			const trimmedCredit = removeEmptyProps(credit);
+			formData.append('credit', JSON.stringify(trimmedCredit));
+			formData.append('categoryImage', file);
+		}
+
 		const response = await axiosInstance.post(
 			`${baseDirectory}/`,
-			category,
+			formData,
 			requestOptions(token)
 		);
 
@@ -50,12 +63,14 @@ export const createCategoryRequest = async (category, token) => {
 	}
 }
 
-export const updateCategoryImageRequest = async (args) => {
-	const { file, token, categoryId } = args;
+export const updateCategoryImageRequest = async (args, token) => {
+	const { file, existingImageId, categoryId, credit } = args;
 	try {
 		return await updateImageRequest({
 			file,
 			token,
+			existingImageId,
+			credit,
 			formDataName: 'categoryImage',
 			endpoint: `${baseDirectory}/${categoryId}/image`
 		});
@@ -64,10 +79,11 @@ export const updateCategoryImageRequest = async (args) => {
 	}
 }
 
-export const updateCategoryRequest = async (categoryId, category, token) => {
+export const updateCategoryRequest = async (data, token) => {
+	const { id, category } = data;
 	try {
 		const response = await axiosInstance.put(
-			`${baseDirectory}/${categoryId}`,
+			`${baseDirectory}/${id}`,
 			category,
 			requestOptions(token)
 		);

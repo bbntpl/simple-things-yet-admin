@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 import CategoryForm from '../../components/Category/CategoryForm';
 import BlogList from '../../components/Blog/BlogList';
-import openNotification, { notifyError } from '../../lib/openNotification';
+import { notifyError, notifySuccess } from '../../lib/openNotification';
 
 import { updateCategoryImageRequest, updateCategoryRequest } from '../../services/categoryAPI';
 import { categoryUpdated, fetchCategories, selectCategory } from '../../redux/sliceReducers/categoriesSlice';
@@ -21,10 +21,10 @@ export default function BlogsPageByCategory() {
 	const publishedBlogs = useSelector(selectPublishedBlogs);
 	const categoryStatus = useSelector(state => state.categories.status);
 	const blogStatus = useSelector(state => state.blogs.status);
-
 	const [form] = Form.useForm();
 
 	const [blogsByCategory, setBlogsByCategory] = useState(null);
+	const [errors, setErrors] = useState([]);
 	const [uploadedImage, uploadedImageSetters] = useImageUpload();
 	const [isDataSubmitting, setIsDataSubmitting] = useState(false);
 
@@ -46,34 +46,44 @@ export default function BlogsPageByCategory() {
 
 	const handleUpdate = async (values) => {
 		setIsDataSubmitting(true);
+
+		const updatedCategoryObject = {
+			name: values.name,
+			description: values.description
+		}
+
+		const credit = {
+			authorName: values?.authorName || '',
+			authorURL: values?.authorURL || '',
+			sourceName: values?.sourceName || '',
+			sourceURL: values?.sourceURL || ''
+		}
+
 		try {
-			console.log(values, uploadedImage);
-			throw new Error('test 123');
-			await updateCategoryImageRequest({
+			const imageData = await updateCategoryImageRequest({
 				file: uploadedImage.file,
-				credit: {
-					authorName: values.authorName,
-					authorURL: values.authorURL || '',
-					sourceName: values.sourceName || '',
-					sourceURL: values.sourceURL || ''
-				},
-				token: authorToken,
+				existingImageId: uploadedImage.existingImageId,
+				credit,
 				categoryId: category.id
-			})
-			const response = await updateCategoryRequest(category.id, values, authorToken);
-			if (response?.errors) {
-				form.setFields(
-					response.errors.map(error => ({ name: error.param, errors: [error.msg] }))
-				);
-			} else if (!!response?.error) {
-				form.setFields([{ name: 'name', errors: [response?.error] }]);
+			}, authorToken)
+
+			const data = await updateCategoryRequest({
+				id: category.id,
+				category: updatedCategoryObject,
+			}, authorToken);
+
+			if (imageData?.errors || data?.errors) {
+				const errors = imageData?.errors || data?.errors;
+				setErrors(errors.map(error => error.msg));
+			} else if (imageData?.error || data?.error) {
+				const error = imageData?.error || data?.error;
+				setErrors([error]);
 			} else {
-				dispatch(categoryUpdated(values));
-				openNotification({
-					type: 'success',
-					message: 'Successful operation',
-					description: `Category "${values.name}" is successfully updated`,
-				});
+				dispatch(categoryUpdated(data));
+				notifySuccess(`Category "${values.name}" is successfully updated`);
+				if (errors.length > 0) {
+					setErrors([]);
+				}
 			}
 		} catch (error) {
 			notifyError(error);
@@ -82,8 +92,7 @@ export default function BlogsPageByCategory() {
 		}
 	}
 
-	if (blogsByCategory === null || blogStatus !== 'succeeded'
-		|| categoryStatus !== 'succeeded') {
+	if (blogsByCategory === null || blogStatus !== 'succeeded' || categoryStatus !== 'succeeded') {
 		return <Spin />
 	}
 
@@ -96,6 +105,7 @@ export default function BlogsPageByCategory() {
 			uploadedImage={uploadedImage}
 			uploadedImageSetters={uploadedImageSetters}
 			isDataSubmitting={isDataSubmitting}
+			errors={errors}
 		/>
 		<Divider />
 		<BlogList

@@ -1,35 +1,32 @@
 import { Form, Typography, Button, Input, Space, Popconfirm, Row, Col } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import openNotification, { notifyError } from '../../lib/openNotification';
+import { notifyError, notifySuccess } from '../../lib/openNotification';
 
 import { deleteCategoryRequest } from '../../services/categoryAPI';
 import { selectToken } from '../../redux/sliceReducers/loggedAuthorSlice';
 import { categoryDeleted } from '../../redux/sliceReducers/categoriesSlice';
 import ImageUploadFormItem from '../ImageUploadFormItem';
-import { fetchImageFileDocRequest } from '../../services/imageDocAPI';
-import { selectImageDoc } from '../../redux/sliceReducers/imageDocsSlice';
 
 const { Title } = Typography;
 
 export default function CategoryForm(props) {
 	const {
 		isEditing = false,
-		category = null,
+		category = null, //category object/values
 		handleSubmit,
 		form,
 		isDataSubmitting,
 		uploadedImage,
 		uploadedImageSetters,
+		errors
 	} = props;
 
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const authorToken = useSelector(selectToken);
-	const categoryImageDoc = useSelector(selectImageDoc(category.imageFile));
-	const [uploadedImageDoc, setUploadedImageDoc] = useState(categoryImageDoc);
 
 	const areThereBlogs = category?.blogs?.length || 0;
 
@@ -38,37 +35,13 @@ export default function CategoryForm(props) {
 			try {
 				await deleteCategoryRequest(categoryId, authorToken);
 				dispatch(categoryDeleted(categoryId));
-				navigate('/blogs');
-				openNotification({
-					type: 'success',
-					description: 'Category successfully deleted'
-				})
+				navigate('/categories');
+				notifySuccess('Category successfully deleted');
 			} catch (error) {
 				notifyError(error)
 			}
 		}
 	}
-
-	async function updateImageDoc(imageId) {
-		const result = await fetchImageFileDocRequest(imageId);
-		setUploadedImageDoc(result);
-	}
-
-	useEffect(() => {
-		try {
-			(async () => await updateImageDoc(uploadedImage.existingImageId))();
-			console.log(uploadedImageDoc);
-			form.setFieldsValue({
-				authorName: uploadedImageDoc?.credit.authorName || '',
-				authorURL: uploadedImageDoc?.credit.authorURL || '',
-				sourceName: uploadedImageDoc?.credit.sourceName || '',
-				sourceURL: uploadedImageDoc?.credit.sourceURL || ''
-			});
-
-		} catch (error) {
-			throw new Error(error.message);
-		}
-	}, [uploadedImage])
 
 	useEffect(() => {
 		if (isEditing && category) {
@@ -78,14 +51,8 @@ export default function CategoryForm(props) {
 				{ name: 'description', value: category.description },
 			];
 			form.setFields(fieldsToBeEdited);
-
-			// Set image doc object derived from uploaded image if it exists
-			// if (category.imageFile) {
-			// 	(async () => await updateImageDoc(category.imageFile))();
-			// }
 		}
 	}, [isEditing, category, form])
-
 
 	return (
 		<Row justify='center'>
@@ -111,7 +78,9 @@ export default function CategoryForm(props) {
 						uploadedImage={uploadedImage}
 						uploadElName='categoryImage'
 						document={category}
+						form={form}
 					/>
+					<Form.ErrorList errors={errors} />
 					<Form.Item>
 						<Button
 							type='primary'

@@ -5,7 +5,8 @@ import DOMPurify from 'dompurify';
 import { useNavigate } from 'react-router-dom';
 import { HeartOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { getBlogImageUrl } from '../../services/blogAPI';
+
+import { getImageUrl } from '../../services/helper';
 
 export default function BlogCard({ blog }) {
 	const {
@@ -43,7 +44,7 @@ export default function BlogCard({ blog }) {
 			{blog.imageFile ?
 				<div style={{ minHeight: '150px' }}>
 					<img
-						src={getBlogImageUrl(blog.imageFile)}
+						src={getImageUrl(blog.imageFile)}
 						alt={title}
 						style={{
 							width: '100%',

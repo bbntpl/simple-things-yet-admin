@@ -1,3 +1,4 @@
+import { removeEmptyProps } from '../helpers';
 import axiosInstance, { requestOptions } from './axiosInstance';
 
 export async function fetchBlob(url) {
@@ -22,14 +23,19 @@ export function getImageUrl(imageId) {
 }
 
 export async function updateImageRequest(args) {
-	const { file, existingImageId, token, formDataName, endpoint } = args;
+	const { file, existingImageId, credit, token, formDataName, endpoint } = args;
 
 	const formData = new FormData();
-	formData.append(formDataName, file);
+
+	if (file) {
+		formData.append(formDataName, file);
+	}
+
 	formData.append('existingImageId', existingImageId || 'NULL')
 
-	if (args?.credit) {
-		formData.append('credit', JSON.stringify(args.credit))
+	if (credit) {
+		const trimmedCredit = removeEmptyProps(credit);
+		formData.append('credit', JSON.stringify(trimmedCredit))
 	}
 
 	const response = await axiosInstance.put(
@@ -39,5 +45,4 @@ export async function updateImageRequest(args) {
 	);
 
 	return response.data;
-
 }
