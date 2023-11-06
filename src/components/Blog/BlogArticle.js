@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify';
 import { HeartFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
+import 'react-quill/dist/quill.snow.css';
 import BlogAuthorInfo from '../Blog/BlogAuthorInfo';
 import { fetchTagByIdRequest } from '../../services/tagAPI';
 import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
@@ -70,7 +71,7 @@ export default function BlogArticle({ blog }) {
 	}, [category])
 
 	const navigateToBlogEditPage = () => {
-		navigate('./update');
+		navigate(`/blog/${blog.id}/update`);
 	}
 	const areAllLoaded = Object.values(loadingStatus)
 		.every(status => status === true)
@@ -84,7 +85,7 @@ export default function BlogArticle({ blog }) {
 				<Button onClick={navigateToBlogEditPage}>
 					Edit Blog
 				</Button>
-				<BlogHeader title={title} previewImage={previewImageUrl} />
+				<BlogHeader title={title} previewImage={previewImageUrl} imageFileDocId={blog.imageFile} />
 				<BlogAuthorInfo author={author} />
 				<BlogTags tags={populatedTags} />
 				<Row>
@@ -96,15 +97,17 @@ export default function BlogArticle({ blog }) {
 					</Col>
 					<Col span={12} style={{ textAlign: 'right' }}>
 						{blogUpdateDate.isSame(blogCreationDate, 'day')
-							? <Text type="secondary">{isPublished ? 'Published: ' : 'Created: '} {blogCreationDate.format('LL')}</Text>
-							: <Text type="secondary">Last Update: {blogUpdateDate.format('LL')}</Text>}
+							? <Text type='secondary'>{isPublished ? 'Published: ' : 'Created: '} {blogCreationDate.format('LL')}</Text>
+							: <Text type='secondary'>Last Update: {blogUpdateDate.format('LL')}</Text>}
 						{blogCategory ? <Text type='secondary'> / {blogCategory.name}</Text> : null}
 					</Col>
 				</Row>
-				<div
-					className="blog-content"
-					dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-				/>
+				<div className='ql-snow'>
+					<div
+						className='ql-editor blog-content'
+						dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+					/>
+				</div>
 			</Card>
 		</div>
 	);

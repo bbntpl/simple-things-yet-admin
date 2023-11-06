@@ -20,8 +20,8 @@
 	height: auto;
 }
 
-.blog-content img {
-	width: 100%;
+.blog-content {
+	margin: 64px 0 0 0;
 }
 
 /* Responsive Layout CSS */

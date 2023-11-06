@@ -11,10 +11,11 @@ import {
 	Radio,
 } from 'antd';
 import ReactQuill from 'react-quill';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import 'react-quill/dist/quill.snow.css';
 import ImageUploadFormItem from '../ImageUploadFormItem';
-import { useEffect } from 'react';
 
 const toolbarOprions = [
 	[{ 'header': 1 }, { 'header': 2 }],
@@ -66,13 +67,13 @@ export default function BlogForm({
 	}
 
 	const navigateToPreviewPage = (isPublished) => {
+		handleSaveDraft()(false);
 		if (isPublished) {
 			navigate(`/blog/${id}`)
 		} else {
 			navigate(`/draft/${id}`)
 		}
 	}
-
 
 	useEffect(() => {
 		if (isEditing && blog) {

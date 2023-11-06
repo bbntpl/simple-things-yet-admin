@@ -63,7 +63,7 @@ function UpdateBlogPage() {
 	}, [id])
 
 	const updateBlog = async (args) => {
-		const { updatedBlog, imageCredit, publishAction } = args;
+		const { updatedBlog, imageCredit, publishAction, showNotify } = args;
 		try {
 			setIsDataSubmitting(true);
 			const data = await updateBlogRequest({
@@ -96,7 +96,9 @@ function UpdateBlogPage() {
 				}
 
 				const msgAction = publishAction === 'save' ? 'updated' : 'published';
-				notifySuccess(`Blog "${blog.title}" is successfully ${msgAction}`);
+				if (showNotify) {
+					notifySuccess(`Blog "${data.title}" is successfully ${msgAction}`);
+				}
 			}
 		} catch (error) {
 			notifyError(error);
@@ -105,7 +107,7 @@ function UpdateBlogPage() {
 		}
 	}
 
-	const handleBlogUpdate = (publishAction) => {
+	const handleBlogUpdate = (publishAction, showNotify) => {
 		const values = form.getFieldsValue();
 		const updatedBlog = {
 			title: values.title,
@@ -130,10 +132,15 @@ function UpdateBlogPage() {
 			sourceURL: values?.sourceURL || ''
 		}
 
-		updateBlog({ updatedBlog, imageCredit, publishAction });
+		updateBlog({ updatedBlog, imageCredit, publishAction, showNotify });
 	}
 
-	const handleSaveDraft = () => () => handleBlogUpdate('save');
+	const handleSaveDraft = () => {
+		return (showNotify = true) => {
+			handleBlogUpdate('save', showNotify);
+		}
+	}
+
 	const handleBlogSubmit = () => () => handleBlogUpdate('publish');
 
 	const handleBlogDeletion = async () => {

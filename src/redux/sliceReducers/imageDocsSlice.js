@@ -47,7 +47,7 @@ const imageDocsSlice = createSlice({
 	},
 });
 export const selectImageDoc = (id) => (state) =>
-	state.imageDocs.data.find(doc => doc.id === doc) || null;
+	state.imageDocs.data.find(doc => doc.id === id) || null;
 export const selectImageDocs = (state) => state.imageDocs.data;
 
 export const {
