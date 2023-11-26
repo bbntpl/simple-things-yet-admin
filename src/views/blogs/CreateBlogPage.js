@@ -13,6 +13,7 @@ import Title from 'antd/es/typography/Title';
 import { fetchTags, selectTags, tagBlogsUpdated } from '../../redux/sliceReducers/tagsSlice';
 import { extractIds } from '../../helpers';
 import useImageUpload from '../../hooks/useImageUpload';
+import { fetchImageDocById } from '../../redux/sliceReducers/imageDocsSlice';
 
 function CreateBlogPage() {
 	const navigate = useNavigate();
@@ -64,6 +65,10 @@ function CreateBlogPage() {
 				blogId: updatedBlog.id
 			}))
 		}
+
+		if (uploadedImage.file) {
+			dispatch(fetchImageDocById(updatedBlog.imageFile));
+		}
 		navigate(navigateTo);
 		const msgAction = publishAction === 'save' ? 'saved as draft' : 'published';
 		notifySuccess(`New blog "${updatedBlog.title}" is successfully ${msgAction}`);
@@ -110,25 +115,30 @@ function CreateBlogPage() {
 	const handleBlogSubmit = () => () => handleBlogCreate('publish');
 	const handleSaveDraft = () => () => handleBlogCreate('save');
 
-	if (tagStatus !== 'succeeded' || categoryStatus !== 'succeeded') {
+	if (tagStatus !== 'succeeded' || categoryStatus !== 'succeeded' || !form.getFieldsValue()) {
 		return <Spin />
 	}
 
-	return <Layout>
-		<Title level={3}>Create a new blog</Title>
-		<BlogForm
-			blog={initialFormValues}
-			blogCategories={categories}
-			blogTags={tags}
-			handleBlogSubmit={handleBlogSubmit}
-			handleSaveDraft={handleSaveDraft}
-			isDataSubmitting={isDataSubmitting}
-			form={form}
-			uploadedImage={uploadedImage}
-			uploadedImageSetters={uploadedImageSetters}
-			errors={errors}
-		/>
-	</Layout>
+	return (
+		<Layout style={{
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center'
+		}}>
+			<Title level={3}>Create a new blog</Title>
+			<BlogForm
+				blog={initialFormValues}
+				blogCategories={categories}
+				blogTags={tags}
+				handleBlogSubmit={handleBlogSubmit}
+				handleSaveDraft={handleSaveDraft}
+				isDataSubmitting={isDataSubmitting}
+				form={form}
+				uploadedImage={uploadedImage}
+				uploadedImageSetters={uploadedImageSetters}
+				errors={errors}
+			/>
+		</Layout>)
 }
 
 export default CreateBlogPage;

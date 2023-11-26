@@ -3,35 +3,28 @@ import { fetchCategoriesRequest } from '../../services/categoryAPI';
 
 const initialState = {
 	status: 'idle',
-	categories: [],
-	error: null
+	data: [],
 }
-
-export const fetchCategories = createAsyncThunk('categories/fetchCategories',
-	async () => {
-		const response = await fetchCategoriesRequest();
-		return response;
-	});
 
 const categoriesSlice = createSlice({
 	name: 'categories',
 	initialState,
 	reducers: {
 		categoryAdded(state, action) {
-			state.categories.push(action.payload)
+			state.data.push(action.payload)
 		},
 		categoryDeleted(state, action) {
-			state.categories = state.categories.filter(category => category.id !== action.payload);
+			state.data = state.data.filter(category => category.id !== action.payload);
 		},
 		categoryUpdated(state, action) {
-			const index = state.categories.findIndex(category => category.id === action.payload.id);
+			const index = state.data.findIndex(category => category.id === action.payload.id);
 			if (index > -1) {
-				state.categories[index] = action.payload;
+				state.data[index] = action.payload;
 			}
 		},
 		categoryBlogsUpdated(state, action) {
 			const { categoryId, blogId } = action.payload;
-			const category = state.categories.find(cat => cat.id === categoryId);
+			const category = state.data.find(cat => cat.id === categoryId);
 
 			if (category) {
 				// If it exists, it means the blog got deleted; otherwise, it got added
@@ -54,17 +47,20 @@ const categoriesSlice = createSlice({
 			})
 			.addCase(fetchCategories.fulfilled, (state, action) => {
 				state.status = 'succeeded';
-				state.categories = action.payload
-			})
-			.addCase(fetchCategories.rejected, (state, action) => {
-				state.status = 'failed';
-				state.error = action.error.message;
+				state.data = action.payload
 			})
 	},
 });
+
+export const fetchCategories = createAsyncThunk('categories/fetchCategories',
+	async () => {
+		const response = await fetchCategoriesRequest();
+		return response;
+	});
+
 export const selectCategory = (slug) => (state) =>
-	state.categories.categories.find(cat => cat.slug === slug) || null;
-export const selectCategories = (state) => state.categories.categories;
+	state.categories.data.find(cat => cat.slug === slug) || null;
+export const selectCategories = (state) => state.categories.data;
 
 export const {
 	categoryAdded,

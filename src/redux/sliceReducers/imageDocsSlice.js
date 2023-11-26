@@ -1,25 +1,18 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchImageFileDocsRequest } from '../../services/imageDocAPI';
+import { fetchImageFileDocRequest, fetchImageFileDocsRequest } from '../../services/imageDocAPI';
 
 const initialState = {
 	status: 'idle',
 	data: [],
-	error: null
 }
-
-export const fetchImageDocs = createAsyncThunk('imageDocs/fetchImageDocs',
-	async () => {
-		const response = await fetchImageFileDocsRequest();
-		return response;
-	});
 
 const imageDocsSlice = createSlice({
 	name: 'imageDocs',
 	initialState,
 	reducers: {
 		imageDocAdded(state, action) {
-			state.data.push(action.payload)
+			state.data = [...(new Set([...state.data, action.payload]))]
 		},
 		imageDocDeleted(state, action) {
 			state.data = state.data.filter(imageDoc => imageDoc.id !== action.payload);
@@ -38,14 +31,30 @@ const imageDocsSlice = createSlice({
 			})
 			.addCase(fetchImageDocs.fulfilled, (state, action) => {
 				state.status = 'succeeded';
-				state.data = action.payload
+				state.data = action.payload;
 			})
-			.addCase(fetchImageDocs.rejected, (state, action) => {
-				state.status = 'failed';
-				state.error = action.error.message;
+			.addCase(fetchImageDocById.pending, (state) => {
+				state.status = 'loading';
 			})
+			.addCase(fetchImageDocById.fulfilled, (state, action) => {
+				state.status = 'succeeded';
+				state.data = [...state.data, action.payload];
+			});
 	},
 });
+
+export const fetchImageDocs = createAsyncThunk('imageDocs/fetchImageDocs',
+	async () => {
+		const response = await fetchImageFileDocsRequest();
+		return response;
+	});
+
+export const fetchImageDocById = createAsyncThunk('imageDocs/fetchImageDocById',
+	async (id) => {
+		const response = await fetchImageFileDocRequest(id);
+		return response;
+	})
+
 export const selectImageDoc = (id) => (state) =>
 	state.imageDocs.data.find(doc => doc.id === id) || null;
 export const selectImageDocs = (state) => state.imageDocs.data;

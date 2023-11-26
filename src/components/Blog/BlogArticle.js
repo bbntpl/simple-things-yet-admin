@@ -9,9 +9,9 @@ import 'react-quill/dist/quill.snow.css';
 import BlogAuthorInfo from '../Blog/BlogAuthorInfo';
 import { fetchTagByIdRequest } from '../../services/tagAPI';
 import { fetchCategoryByIdRequest } from '../../services/categoryAPI';
+import { getImageUrl } from '../../services/helper';
 import { notifyError } from '../../lib/openNotification';
 import BlogHeader from './BlogHeader';
-import { getImageUrl } from '../../services/helper';
 import BlogTags from './BlogTags';
 import BlogStatusIndicator from './BlogStatusIndicator';
 
@@ -92,7 +92,7 @@ export default function BlogArticle({ blog }) {
 					<Col span={12} style={{ textAlign: 'left' }}>
 						<Space>
 							<span>{likes.length}</span>
-							< HeartFilled />
+							< HeartFilled style={{ color: 'red' }} />
 						</Space>
 					</Col>
 					<Col span={12} style={{ textAlign: 'right' }}>

@@ -74,6 +74,7 @@ export default function ProfilePage() {
 	if (author === null) return;
 	return (
 		<Layout>
+			<Title level={3}>Your profile</Title>
 			<Form
 				form={form}
 				onFinish={handleAuthorUpdate}

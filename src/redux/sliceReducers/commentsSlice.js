@@ -4,21 +4,19 @@ import {
 	fetchCommentByIdRequest,
 } from '../../services/commentAPI';
 
-export const fetchAllComments = createAsyncThunk(
-	'comments/fetchAllComments',
+export const fetchAllComments = createAsyncThunk('comments/fetchAllComments',
 	async () => {
-		return await fetchAllCommentsRequest();
+		const data = await fetchAllCommentsRequest();
+		return data;
 	}
 );
 
-export const fetchCommentById = createAsyncThunk(
-	'comments/fetchCommentById',
+export const fetchCommentById = createAsyncThunk('comments/fetchCommentById',
 	async (commentId) => {
-		return await fetchCommentByIdRequest(commentId);
+		const data = await fetchCommentByIdRequest(commentId);
+		return data;
 	}
 );
-
-// other thunks similar to fetchCommentByIdAsync
 
 const initialState = [];
 
@@ -66,10 +64,10 @@ const commentsSlice = createSlice({
 	extraReducers: (builder) => {
 		builder
 			.addCase(fetchAllComments.fulfilled, (state, action) => {
-				return action.payload;
+				state = action.payload;
 			})
 			.addCase(fetchCommentById.fulfilled, (state, action) => {
-				return [action.payload];
+				state = [...state, action.payload];
 			});
 	}
 });

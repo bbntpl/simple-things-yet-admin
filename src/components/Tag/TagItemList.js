@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Space } from 'antd';
 import Input from 'antd/es/input/Input';
-import { useDispatch, useSelector } from 'react-redux';
 
 import TagItem from './TagItem';
 import { createTagRequest } from '../../services/tagAPI';
@@ -24,7 +24,7 @@ export default function TagItemList({ tags }) {
 				inputRef.current.focus();
 			})
 			.catch(err => {
-				notifyError('Something wrong happened after submiting new tag: ', err)
+				notifyError(err, 'Something wrong happened after submiting new tag: ')
 			})
 	}
 
@@ -37,7 +37,7 @@ export default function TagItemList({ tags }) {
 
 		<Input
 			placeholder='new tag'
-			style={{ width: '120px' }}
+			style={{ width: '75px' }}
 			onChange={(e) => setNewTag(e.target.value)}
 			onPressEnter={handleSubmit}
 			value={newTag}

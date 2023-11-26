@@ -15,6 +15,7 @@ import { fetchTags, selectTags, tagBlogsUpdated } from '../../redux/sliceReducer
 import { deleteBlogRequest, fetchBlogByIdRequest, updateBlogImageRequest, updateBlogRequest } from '../../services/blogAPI';
 import { extractIds } from '../../helpers';
 import useImageUpload from '../../hooks/useImageUpload';
+import { imageDocAdded } from '../../redux/sliceReducers/imageDocsSlice';
 
 function UpdateBlogPage() {
 	const { id } = useParams();
@@ -91,6 +92,9 @@ function UpdateBlogPage() {
 				}
 			} else {
 				dispatch(blogUpdated(data));
+				if (uploadedImage.file) {
+					dispatch(imageDocAdded(imageData));
+				}
 				if (publishAction === 'publish') {
 					navigate(`/blog/${data.id}`);
 				}
@@ -122,7 +126,8 @@ function UpdateBlogPage() {
 				docs: blogTags,
 				values: values.tags,
 				key: 'name'
-			})
+			}),
+			isPrivate: values.isPrivate
 		}
 
 		const imageCredit = {

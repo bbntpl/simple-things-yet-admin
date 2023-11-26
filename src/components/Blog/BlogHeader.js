@@ -20,7 +20,7 @@ function ImageCreditDisplay({ credit }) {
 			{
 				credit.sourceName && credit.sourceURL ?
 					<span>
-						{' '}in{' '}
+						{' '}on{' '}
 						<a href={credit.sourceURL} target='_blank' rel='noreferrer'>{credit.sourceName}</a>
 					</span>
 					: null
@@ -33,7 +33,6 @@ export default function BlogHeader({ previewImage, title, imageFileDocId }) {
 	const selectedImageDoc = useSelector(selectImageDoc(imageFileDocId));
 	const [currentImageDoc, setCurrentImageDoc] = useState(selectedImageDoc);
 	const dispatch = useDispatch();
-
 	const headerStyle = {
 		background: `
       linear-gradient(
@@ -63,7 +62,6 @@ export default function BlogHeader({ previewImage, title, imageFileDocId }) {
 	}
 
 	useEffect(() => {
-		console.log(selectedImageDoc);
 		if (!currentImageDoc) {
 			initializeCurrentImageDoc();
 		}
