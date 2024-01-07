@@ -1,23 +1,19 @@
-import { Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout } from 'antd';
 
 import { selectLoggedAuthor } from '../redux/sliceReducers/loggedAuthorSlice';
-import useAutomaticLogoutOnTokenExpiry from '../hooks/useAxiosInterceptor';
+import useErrorsInterceptor from '../hooks/useErrorsInterceptor';
 import NavHeader from '../components/NavHeader';
+import GoBackButton from '../components/GoBackButton';
+import AuthStatusManager from '../components/Auth/AuthStatusManager';
 
 function AuthGateway({ children }) {
-	const location = useLocation();
-	const navigate = useNavigate();
 	const loggedAuthor = useSelector(selectLoggedAuthor);
 
-	// must logout automatically if received token expiry error
-	// from backend API
-	useAutomaticLogoutOnTokenExpiry();
-
-	const isCurrentlyIndexPage = () => {
-		return location.pathname === '/' || location.pathname === '/dashboard';
-	}
+	// Handle detected errors through middleware and display them
+	// based on the defined conditions
+	useErrorsInterceptor();
 
 	if (loggedAuthor === null) {
 		return <Navigate to='/login' replace={true} />;
@@ -26,26 +22,11 @@ function AuthGateway({ children }) {
 	return (
 		<>
 			<NavHeader />
-			{
-				isCurrentlyIndexPage() ? null
-					: <button
-						// navigate to previous page if clicked
-						onClick={() => navigate(-1)}
-						style={{
-							cursor: 'pointer',
-							textDecoration: 'underline',
-							width: 'max-content',
-							backgroundColor: 'transparent',
-							border: 0,
-							margin: '1rem 1.5rem'
-						}}
-					>
-						Go back
-					</button>
-			}
+			<GoBackButton />
 			<Layout className='responsive-layout'>
 				{children}
 			</Layout>
+			<AuthStatusManager />
 		</>
 	);
 }
