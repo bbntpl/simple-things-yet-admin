@@ -27,7 +27,7 @@ const formStyle = {
 	margin: '0 0 1rem 0',
 }
 
-function AuthForm({ authFormType }) {
+function AuthForm({ authFormType = 'login', onSuccess = () => { } }) {
 	const loggedAuthor = useSelector(selectLoggedAuthor);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -42,11 +42,16 @@ function AuthForm({ authFormType }) {
 	const redirectAfterSuccess = (authFormType) => {
 		// if there are no errors, it means the registration/login was successful
 		// hence, navigate to /login or / route programmatically
+		const navigateTo =
+			authFormType === 'register' ? '/login' :
+				authFormType === 'relogin' ? null :
+					'/dashboard';
 
-		const navigateTo = authFormType === 'register' ? '/login' : '/dashboard';
-		navigate(navigateTo);
-		notifyAfterSuccess(authFormType);
-	}
+		if (navigateTo) {
+			navigate(navigateTo);
+			notifyAfterSuccess(authFormType);
+		}
+	};
 
 	const notifyAfterSuccess = (authFormType) => {
 		const successMsg = `${authFormType === 'register'
@@ -87,11 +92,12 @@ function AuthForm({ authFormType }) {
 			let response;
 			if (authFormType === 'register') {
 				response = await submitAuthorRegistration();
-			} else if (authFormType === 'login') {
+			} else if (authFormType === 'login' || authFormType === 'relogin') {
 				response = await submitAuthorLogin();
 				if (!response?.errors) {
 					handleAuthorLogin(response);
 					await saveAuthorInfo();
+					onSuccess();
 				}
 			}
 
@@ -119,7 +125,10 @@ function AuthForm({ authFormType }) {
 	}
 	return (
 		<Content style={contentStyle}>
-			{loggedAuthor && <Navigate to='/dashboard' replace={true} />}
+			{
+				(loggedAuthor && authFormType === 'login') &&
+				<Navigate to='/dashboard' replace={true} />
+			}
 			<Row justify='center' gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
 				<Col span={32}>
 					<Title level={2}>
